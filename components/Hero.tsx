@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { withBase } from "@/lib/paths";
 
 export function Hero() {
     return (
@@ -26,7 +27,7 @@ export function Hero() {
                     <div className="relative w-full max-w-2xl flex flex-col items-start gap-10">
                         <div className="relative w-56 sm:w-72 lg:w-80 aspect-square">
                             <Image
-                                src="/logo.svg"
+                                src={withBase("/logo.svg")}
                                 alt="Trikhya Intelligence Foundry"
                                 fill
                                 className="object-contain"

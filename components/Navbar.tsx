@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { withBase } from "@/lib/paths";
 
 const links = [
     { href: "/#core", label: "Core" },
@@ -31,7 +32,7 @@ export function Navbar() {
         >
             <div className="pointer-events-auto flex w-full max-w-fit items-center gap-3 pl-4 pr-2 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl shadow-lg ring-1 ring-white/5 sm:gap-6">
                 <Link href="/" className="flex items-center gap-2.5 text-white">
-                    <Image src="/logo.svg" alt="" width={28} height={28} priority />
+                    <Image src={withBase("/logo.svg")} alt="" width={28} height={28} priority />
                     <span className="text-[15px] font-semibold tracking-tight">Trikhya Intelligence Foundry</span>
                 </Link>
                 <div className="hidden items-center gap-5 text-sm md:flex">

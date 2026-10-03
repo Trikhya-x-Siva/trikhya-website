@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { withBase } from "@/lib/paths";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   title: "Trikhya Intelligence Foundry",
   description: "Force Multiply Your Business with AI - Generalist Accelerators, Specialized Workflows, and Domain-Adapted Intelligence.",
   icons: {
-    icon: "/logo.svg",
+    icon: withBase("/logo.svg"),
   },
 };
 
