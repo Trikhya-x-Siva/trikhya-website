@@ -1,34 +1,29 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
-import "./globals.css";
-import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/site/Footer";
+import { Header } from "@/components/site/Header";
+import { MotionRoot } from "@/components/site/MotionRoot";
 import { withBase } from "@/lib/paths";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space",
-  subsets: ["latin"],
-});
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Trikhya Intelligence Foundry",
-  description: "Force Multiply Your Business with AI - Generalist Accelerators, Specialized Workflows, and Domain-Adapted Intelligence.",
-  icons: {
-    icon: withBase("/logo.svg"),
-  },
+  title: { default: "Trikhya Intelligence Foundry", template: "%s · Trikhya Intelligence Foundry" },
+  description: "Where AI ambition becomes working machinery. We design and engineer AI with people at both ends.",
+  icons: { icon: withBase("/trikhya-mark.png") },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body
-        className={`${spaceGrotesk.variable} antialiased`}
-      >
-        <Navbar />
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+      </head>
+      <body>
+        <Header />
         {children}
+        <Footer />
+        <MotionRoot />
       </body>
     </html>
   );

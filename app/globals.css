@@ -1,28 +1,8 @@
-@import "tailwindcss";
-
-:root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --electric-cobalt: #3b82f6;
-  /* Adjust as needed */
-  --molten-gold: #f59e0b;
-  --amber-accent: #f59e0b;
-  /* Amber-500 */
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-electric-cobalt: var(--electric-cobalt);
-  --color-molten-gold: var(--molten-gold);
-  --color-amber-accent: var(--amber-accent);
-  --font-sans: var(--font-space);
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* Base styles from the Claude Design export. No framework reset: the pages carry their own inline styles. */
+html { scroll-behavior: smooth; }
+body { margin: 0; background: #0E1116; -webkit-font-smoothing: antialiased; font-family: 'Hanken Grotesk', sans-serif; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: #8fd3f7; }
+input, textarea, button { font: inherit; }
+::selection { background: #4FB8EE; color: #0E1116; }
+@keyframes blink { 50% { opacity: 0; } }
