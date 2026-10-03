@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion, useTyped } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const solutions = [
   { tag: "02 · B-AI-B", title: "Document & knowledge assistants", body: "Search, summarise and answer across contracts, manuals and internal knowledge, with citations." },
   { tag: "03 · B-AI-B", title: "Multi-step workflow agents", body: "Agents that carry routine processes from intake to completion, handing off to people at the right moments." },
@@ -71,8 +72,8 @@ export function SolutionsPage() {
 <div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Want one of these, shaped to your business?</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
-<a href="/contact/" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Talk to us →</a>
-<a href="/services/" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>Our services</a>
+<a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Talk to us →</a>
+<a href={withBase("/services/")} data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>Our services</a>
 </div>
 </div>
 </section>

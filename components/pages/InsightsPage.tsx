@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const allPosts = [
   { tag: "ESSAY · 6 MIN", title: "Why human-AI-human beats fully autonomous AI in operations" },
   { tag: "ENGINEERING · 9 MIN", title: "Getting correct answers from messy business data" },
@@ -36,7 +37,7 @@ export function InsightsPage() {
 </div>
 <div data-htrack="1" style={{ position: "relative" }}><div style={{ position: "sticky", top: "140px", overflow: "hidden" }}><div data-htrack-row="1" style={{ display: "flex", gap: "28px", width: "max-content" }}>
 {allPosts.map((p, i) => (<Fragment key={i}>
-<a href="/insights/" data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116", width: "min(440px,78vw)", flex: "none" }} data-hover="color:#1670A6;">
+<a href={withBase("/insights/")} data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116", width: "min(440px,78vw)", flex: "none" }} data-hover="color:#1670A6;">
 <div data-wipe="1" style={{ aspectRatio: "16/10", background: "repeating-linear-gradient(135deg,#e3e7ec 0 10px,#edf0f3 10px 20px)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#5b6370", background: "#F4F6F8", padding: "5px 9px" }}>cover image</span></div>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#5b6370" }}>{p.tag}</span>
 <span style={{ fontSize: "23px", fontWeight: "700", lineHeight: "1.25", letterSpacing: "-.01em" }}>{p.title}</span>
@@ -50,7 +51,7 @@ export function InsightsPage() {
 <div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Want to talk about any of this?</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
-<a href="/contact/" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Get in touch →</a>
+<a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Get in touch →</a>
 
 </div>
 </div>

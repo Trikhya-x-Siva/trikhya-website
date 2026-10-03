@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const principles = [
   { n: "01", title: "Ship, then refine", body: "A working system in real hands teaches more than any slide. We get there early and improve from use." },
   { n: "02", title: "People stay in charge", body: "AI extends human judgement. It doesn’t quietly replace it." },
@@ -78,7 +79,7 @@ export function AboutPage() {
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Have something worth building? Let’s talk.</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
 <a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">✉ Email us</a>
-<a href="/careers/" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>Join the team</a>
+<a href={withBase("/careers/")} data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>Join the team</a>
 </div>
 </div>
 </section>

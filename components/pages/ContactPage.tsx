@@ -3,6 +3,7 @@
 import { Fragment, useRef, useState } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 
 export function ContactPage() {
   const rootRef = useRef<HTMLDivElement>(null);

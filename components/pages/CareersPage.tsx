@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const roles = [
   { title: "AI Engineer", team: "Engineering", where: "Location · placeholder" },
   { title: "Forward-Deployed Engineer", team: "Delivery", where: "Location · placeholder" },

@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const services = [
   { n: "01", title: "AI strategy & discovery", body: "We find the decisions where AI pays back first, and define how success will be measured." },
   { n: "02", title: "Data & systems integration", body: "Connecting the tools, databases and documents you already use into a layer AI can reason over safely." },
@@ -41,7 +42,7 @@ export function ServicesPage() {
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>WHAT WE FORGE</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>From first sketch to systems that run every day.</h2>
 </div>
-<a href="/contact/" style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>Discuss your use case →</a>
+<a href={withBase("/contact/")} style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>Discuss your use case →</a>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1px", background: "#d5dbe2", border: "1px solid #d5dbe2" }}>
 {services.map((s, i) => (<Fragment key={i}>
@@ -95,8 +96,8 @@ export function ServicesPage() {
 <div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Have a use case in mind?</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
-<a href="/contact/" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Discuss it with us →</a>
-<a href="/solutions/" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>See solutions</a>
+<a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Discuss it with us →</a>
+<a href={withBase("/solutions/")} data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>See solutions</a>
 </div>
 </div>
 </section>

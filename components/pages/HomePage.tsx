@@ -3,6 +3,7 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion, useTyped } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 const services = [
   { n: "01", title: "AI strategy & discovery", body: "We find the decisions where AI pays back first, and define how success will be measured." },
   { n: "02", title: "Data & systems integration", body: "Connecting the tools, databases and documents you already use into a layer AI can reason over safely." },
@@ -107,7 +108,7 @@ export function HomePage() {
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>WHAT WE FORGE</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>From first sketch to systems that run every day.</h2>
 </div>
-<a href="/services/" style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All services →</a>
+<a href={withBase("/services/")} style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All services →</a>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "1px", background: "#d5dbe2", border: "1px solid #d5dbe2" }}>
 {services.map((s, i) => (<Fragment key={i}>
@@ -150,7 +151,7 @@ export function HomePage() {
 </div>
 </div>
 </div>
-<div data-reveal="1"><a href="/solutions/" style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">See all solutions →</a></div>
+<div data-reveal="1"><a href={withBase("/solutions/")} style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">See all solutions →</a></div>
 </div>
 </section>
 
@@ -162,7 +163,7 @@ export function HomePage() {
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Engineers who ship, in a field full of demos.</h2>
 </div>
 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}><p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf" }}>Trikhya means three. Three facets in our mark, three steps in every build: a person, the intelligence, a person again.</p>
-<a href="/about/" style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">Read our story →</a></div>
+<a href={withBase("/about/")} style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">Read our story →</a></div>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "40px" }}>
 {offerings.map((o, i) => (<Fragment key={i}>
@@ -182,11 +183,11 @@ export function HomePage() {
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>INSIGHTS</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Notes from the foundry floor.</h2>
 </div>
-<a href="/insights/" style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All insights →</a>
+<a href={withBase("/insights/")} style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All insights →</a>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "28px" }}>
 {posts.map((p, i) => (<Fragment key={i}>
-<a href="/insights/" data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116" }} data-hover="color:#1670A6;">
+<a href={withBase("/insights/")} data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116" }} data-hover="color:#1670A6;">
 <div data-wipe="1" style={{ aspectRatio: "16/10", background: "repeating-linear-gradient(135deg,#e3e7ec 0 10px,#edf0f3 10px 20px)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#5b6370", background: "#F4F6F8", padding: "5px 9px" }}>cover image</span></div>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#5b6370" }}>{p.tag}</span>
 <span style={{ fontSize: "23px", fontWeight: "700", lineHeight: "1.25", letterSpacing: "-.01em" }}>{p.title}</span>
@@ -203,7 +204,7 @@ export function HomePage() {
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Come build the real thing.</h2>
 <p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55" }}>We hire engineers, data people and product thinkers who like seeing their work used on Monday morning.</p>
 </div>
-<a href="/careers/" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">See open roles →</a>
+<a href={withBase("/careers/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">See open roles →</a>
 </div>
 </section>
 
@@ -212,7 +213,7 @@ export function HomePage() {
 <div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Bring us the problem. We’ll bring the machinery.</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
-<a href="/contact/" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Start a conversation →</a>
+<a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Start a conversation →</a>
 <a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>✉ Email us</a>
 </div>
 </div>

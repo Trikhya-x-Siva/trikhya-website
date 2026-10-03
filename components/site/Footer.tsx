@@ -1,4 +1,5 @@
 import { MARK_BLUE } from "@/lib/assets";
+import { withBase } from "@/lib/paths";
 
 const PAGES = [["/", "Home"], ["/solutions/", "Solutions"], ["/about/", "About"], ["/insights/", "Insights"], ["/careers/", "Careers"], ["/contact/", "Contact"]];
 const SOCIAL = [["https://www.linkedin.com/", "LinkedIn"], ["https://x.com/", "X"], ["https://github.com/", "GitHub"], ["https://www.youtube.com/", "YouTube"], ["https://www.instagram.com/", "Instagram"]];
@@ -13,7 +14,7 @@ export function Footer() {
             <span style={{ fontWeight: 900, fontSize: 16, letterSpacing: ".14em" }}>TRIKHYA <span style={{ color: "#4FB8EE" }}>INTELLIGENCE FOUNDRY</span></span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 28, fontSize: 15, color: "#aab3bf" }}>
-            {PAGES.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
+            {PAGES.map(([href, label]) => <a key={href} href={withBase(href)}>{label}</a>)}
           </div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 24, paddingTop: 28, borderTop: "1px solid #222831" }}>
