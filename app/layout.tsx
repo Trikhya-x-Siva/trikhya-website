@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { Navbar } from "@/components/Navbar";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   title: "Trikhya Intelligence Foundry",
   description: "Force Multiply Your Business with AI - Generalist Accelerators, Specialized Workflows, and Domain-Adapted Intelligence.",
   icons: {
-    icon: "/transparent-logo.jpg",
+    icon: "/logo.svg",
   },
 };
 
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} antialiased`}
       >
+        <Navbar />
         {children}
       </body>
     </html>

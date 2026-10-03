@@ -12,7 +12,6 @@ export function Hero() {
             <div className="absolute inset-0 z-0 pointer-events-none select-none">
                 <div className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-cyan-500/10 via-blue-600/10 to-violet-600/10 blur-[100px] animate-pulse" />
                 <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] rounded-full bg-gradient-to-tl from-amber-500/5 via-purple-600/10 to-cyan-600/10 blur-[100px]" />
-                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
             </div>
 
             <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
@@ -23,22 +22,19 @@ export function Hero() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex flex-col justify-center items-start h-full"
                 >
-                    {/* Combined Container: Image + Overlay Text */}
-                    <div className="relative w-full max-w-2xl -ml-4 flex flex-col justify-center">
-                        <div className="absolute inset-0 bg-gradient-radial from-amber-500/20 to-transparent opacity-50 blur-3xl -z-10" />
+                    {/* Logo mark + wordmark */}
+                    <div className="relative w-full max-w-2xl flex flex-col items-start gap-10">
+                        <div className="relative w-56 sm:w-72 lg:w-80 aspect-square">
+                            <Image
+                                src="/logo.svg"
+                                alt="Trikhya Intelligence Foundry"
+                                fill
+                                className="object-contain"
+                                priority
+                            />
+                        </div>
 
-                        {/* Image */}
-                        <Image
-                            src="/trikya-full-logo-2.png"
-                            alt="Trikhya Intelligence Foundry"
-                            width={1000}
-                            height={1000}
-                            className="w-full h-auto mix-blend-screen relative z-0"
-                            priority
-                        />
-
-                        {/* Text Overlay - Absolutely positioned to sit ON/BELOW the spectrum regardless of image padding */}
-                        <div className="absolute bottom-[15%] left-4 z-20 pl-4 border-l-2 border-electric-cobalt backdrop-blur-sm bg-black/20 p-4 rounded-r-xl">
+                        <div className="pl-4 border-l-2 border-electric-cobalt backdrop-blur-sm bg-black/20 p-4 rounded-r-xl">
                             <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
                                 Trikhya Intelligence Foundry
                             </h3>
@@ -84,7 +80,7 @@ export function Hero() {
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
 
-                        <Link href="/coming-soon" className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg transition-all duration-300 font-medium backdrop-blur-sm">
+                        <Link href="/solutions" className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg transition-all duration-300 font-medium backdrop-blur-sm">
                             View Solutions
                         </Link>
                     </motion.div>
