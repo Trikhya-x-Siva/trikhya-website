@@ -58,8 +58,10 @@ export function initMotion({ markWhite, markBlue }: Opts) {
     },
     wipe(el) {
       if (reduce) return;
+      // A fully clipped element never "intersects", so the reveal is driven by the scroll loop.
       el.style.clipPath = "inset(0 100% 0 0)";
-      onView(el, () => el.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }], { duration: 1000, easing: "cubic-bezier(.7,0,.2,1)", fill: "forwards" }).finished.then(() => (el.style.clipPath = "none")));
+      el.dataset.wipePending = "1";
+      scrollers.add(el);
     },
     fill(el) {
       el.innerHTML = (el.textContent || "").trim().split(/\s+/).map((w) => `<span data-fw style="transition:opacity .25s;opacity:.18;">${w}</span>`).join(" ");
@@ -159,7 +161,12 @@ export function initMotion({ markWhite, markBlue }: Opts) {
     scrollers.forEach((el) => {
       if (!el.isConnected) { scrollers.delete(el); return; }
       const r = el.getBoundingClientRect();
-      if (el.dataset.parallax) {
+      if (el.dataset.wipePending) {
+        if (r.top < vh * 0.85 && r.bottom > vh * 0.1) {
+          delete el.dataset.wipePending; scrollers.delete(el);
+          el.animate([{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0 0 0)" }], { duration: 1000, easing: "cubic-bezier(.7,0,.2,1)", fill: "forwards" }).finished.then(() => (el.style.clipPath = "none"));
+        }
+      } else if (el.dataset.parallax) {
         const f = parseFloat(el.dataset.parallax) || 0.15;
         el.style.translate = `0 ${(r.top + r.height / 2 - vh / 2) * -f}px`;
       } else if (el.hasAttribute("data-fill")) {
