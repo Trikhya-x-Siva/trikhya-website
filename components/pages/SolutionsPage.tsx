@@ -18,7 +18,7 @@ export function SolutionsPage() {
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
 <img data-spin="1" data-parallax="0.3" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-10%", top: "4%", width: "min(56vw,780px)", opacity: ".12", pointerEvents: "none" }} />
-<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "110px 40px 110px", display: "flex", flexDirection: "column", gap: "28px" }}>
+<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(56px,8vw,110px) clamp(20px,5vw,40px) clamp(64px,8vw,110px)", display: "flex", flexDirection: "column", gap: "28px" }}>
 <div data-word="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".18em", display: "flex", gap: "12px", alignItems: "center" }}><span style={{ width: "28px", height: "1px", background: "#ffffff" }}></span>SOLUTIONS</div>
 <h1 style={{ margin: "0", fontSize: "clamp(46px,6.6vw,100px)", lineHeight: ".95", fontWeight: "800", letterSpacing: "-.045em", maxWidth: "1050px" }}><span data-word="1" style={{ display: "inline-block" }}>Patterns</span> <span data-word="1" style={{ display: "inline-block" }}>proven</span> <span data-word="1" style={{ display: "inline-block" }}>in</span> <span data-word="1" style={{ display: "inline-block", color: "#BFE6FA" }}>production.</span></h1>
 <p data-word="1" style={{ margin: "0", fontSize: "clamp(18px,1.7vw,23px)", lineHeight: "1.5", maxWidth: "660px", textWrap: "pretty" }}>Each solution was built for a real client, then generalised into a pattern we can adapt for the next. Client names stay private.</p>
@@ -26,7 +26,7 @@ export function SolutionsPage() {
 </section>
 
 <section id="solutions" style={{ background: "#0E1116", color: "#ffffff" }}>
-<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "140px 40px", display: "flex", flexDirection: "column", gap: "72px" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "72px" }}>
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "860px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>SOLUTIONS</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", textWrap: "balance" }}>What we’ve already built.</h2>
@@ -40,15 +40,15 @@ export function SolutionsPage() {
 </div>
 <div data-reveal="1" data-wipe="1" style={{ background: "#161a21", border: "1px solid #2a313c", boxShadow: "0 40px 90px rgba(0,0,0,.5)", display: "flex", flexDirection: "column" }}>
 <div style={{ display: "flex", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #2a313c", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#7d8794" }}><span>analytics-assistant</span><span style={{ color: "#5fd39a" }}>● systems connected</span></div>
-<div style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: "22px", minHeight: "360px" }}>
+<div style={{ padding: "clamp(18px,4vw,28px) clamp(14px,4vw,24px)", display: "flex", flexDirection: "column", gap: "22px", minHeight: "360px" }}>
 <div style={{ alignSelf: "flex-end", background: "#232a34", padding: "14px 18px", fontSize: "17px", maxWidth: "88%", minHeight: "24px" }}><span>{typed}</span><span style={{ display: "inline-block", width: "2px", height: "18px", background: "#4FB8EE", marginLeft: "2px", verticalAlign: "-3px", animation: "blink 1s steps(1) infinite" }}></span></div>
 <div style={{ display: "flex", flexDirection: "column", gap: "14px", opacity: `${ansOpacity}`, transform: `translateY(${ansShift}px)`, transition: "opacity .5s,transform .5s" }}>
 <div style={{ fontSize: "16px", lineHeight: "1.5", color: "#dde2e8" }}><b style={{ color: "#4FB8EE" }}>3 orders</b> are at risk this week. All three depend on the same delayed input.</div>
 <div style={{ border: "1px solid #2a313c", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr .8fr", padding: "10px 14px", color: "#7d8794", borderBottom: "1px solid #2a313c" }}><span>ORDER</span><span>CUSTOMER</span><span>DUE</span><span>SLIP</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr .8fr", padding: "10px 14px", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48213</span><span>Customer A</span><span>Thu</span><span style={{ color: "#f0a35e" }}>+2d</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr .8fr", padding: "10px 14px", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48230</span><span>Customer B</span><span>Fri</span><span style={{ color: "#f0a35e" }}>+1d</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr .8fr", padding: "10px 14px", color: "#dde2e8" }}><span>SO-48251</span><span>Customer C</span><span>Fri</span><span style={{ color: "#ef6b6b" }}>+4d</span></div>
+<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#7d8794", borderBottom: "1px solid #2a313c" }}><span>ORDER</span><span>CUSTOMER</span><span>DUE</span><span>SLIP</span></div>
+<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48213</span><span>Customer A</span><span>Thu</span><span style={{ color: "#f0a35e" }}>+2d</span></div>
+<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48230</span><span>Customer B</span><span>Fri</span><span style={{ color: "#f0a35e" }}>+1d</span></div>
+<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8" }}><span>SO-48251</span><span>Customer C</span><span>Fri</span><span style={{ color: "#ef6b6b" }}>+4d</span></div>
 </div>
 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", color: "#7d8794" }}>SOURCES · orders, schedules · 1.8s</div>
 </div>
@@ -69,7 +69,7 @@ export function SolutionsPage() {
 
 <section style={{ background: "#1670A6", color: "#ffffff", position: "relative", overflow: "hidden" }}>
 <img data-spin="1" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-120px", bottom: "-200px", width: "520px", opacity: ".12", pointerEvents: "none" }} />
-<div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
+<div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(72px,9vw,120px) clamp(20px,5vw,40px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Want one of these, shaped to your business?</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
 <a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Talk to us →</a>

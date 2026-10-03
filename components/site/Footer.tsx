@@ -7,7 +7,7 @@ const SOCIAL = [["https://www.linkedin.com/", "LinkedIn"], ["https://x.com/", "X
 export function Footer() {
   return (
     <footer style={{ background: "#0E1116", color: "#ffffff", borderTop: "1px solid #222831" }}>
-      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "72px 40px 40px", display: "flex", flexDirection: "column", gap: 56 }}>
+      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "clamp(48px,7vw,72px) clamp(20px,5vw,40px) 40px", display: "flex", flexDirection: "column", gap: 56 }}>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 40 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <img src={MARK_BLUE} alt="" style={{ width: 40, height: "auto" }} />

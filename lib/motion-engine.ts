@@ -158,6 +158,7 @@ export function initMotion({ markWhite, markBlue }: Opts) {
     const doc = document.documentElement, max = doc.scrollHeight - vh;
     if (bar) bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
     if (brand) brand.style.transform = scrollY > 40 ? "scale(.9)" : "";
+    document.querySelectorAll<HTMLElement>("[data-hide-sm]").forEach((h) => (h.style.display = innerWidth < 640 ? "none" : ""));
     scrollers.forEach((el) => {
       if (!el.isConnected) { scrollers.delete(el); return; }
       const r = el.getBoundingClientRect();
@@ -179,6 +180,7 @@ export function initMotion({ markWhite, markBlue }: Opts) {
         const sh = sticky ? sticky.offsetHeight : 0, top = Math.max(100, (vh - sh) / 2), off = narrow || !oneRow || sh + 100 > vh;
         el.style.height = off ? "auto" : `calc(${sh}px + 90vh)`;
         if (sticky) { sticky.style.position = off ? "static" : "sticky"; sticky.style.top = top + "px"; }
+        if (line) { line.style.display = off ? "none" : ""; const prev = line.previousElementSibling as HTMLElement | null; if (prev) prev.style.display = off ? "none" : ""; }
         if (off) { steps.forEach((s) => (s.style.opacity = "1")); if (line) line.style.transform = "scaleX(1)"; return; }
         const p = clamp(-r.top / Math.max(1, r.height - vh * 0.75)); const idx = Math.min(steps.length - 1, Math.floor(p * steps.length));
         steps.forEach((s, i) => { s.style.transition = "opacity .4s, transform .4s"; s.style.opacity = i <= idx ? "1" : "0.28"; s.style.transform = i === idx ? "translateY(-6px)" : "none"; });

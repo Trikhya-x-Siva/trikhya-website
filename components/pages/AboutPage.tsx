@@ -18,7 +18,7 @@ export function AboutPage() {
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
 <img data-spin="1" data-parallax="0.3" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-10%", top: "4%", width: "min(56vw,780px)", opacity: ".12", pointerEvents: "none" }} />
-<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px 120px", display: "flex", flexDirection: "column", gap: "28px" }}>
+<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(64px,9vw,120px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "28px" }}>
 <div data-word="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".18em", display: "flex", gap: "12px", alignItems: "center" }}><span style={{ width: "28px", height: "1px", background: "#ffffff" }}></span>OUR STORY</div>
 <h1 style={{ margin: "0", fontSize: "clamp(48px,7vw,108px)", lineHeight: ".95", fontWeight: "800", letterSpacing: "-.045em", maxWidth: "1050px" }}>
 <span data-word="1" style={{ display: "inline-block" }}>We</span> <span data-word="1" style={{ display: "inline-block" }}>started</span> <span data-word="1" style={{ display: "inline-block" }}>a</span> <span data-word="1" style={{ display: "inline-block" }}>foundry</span> <span data-word="1" style={{ display: "inline-block" }}>because</span> <span data-word="1" style={{ display: "inline-block" }}>AI</span> <span data-word="1" style={{ display: "inline-block" }}>needed</span> <span data-word="1" style={{ display: "inline-block", color: "#BFE6FA" }}>makers.</span>
@@ -27,7 +27,7 @@ export function AboutPage() {
 </div>
 </section>
 
-<section style={{ maxWidth: "1360px", margin: "0 auto", padding: "140px 40px", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "64px" }}>
+<section style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "64px" }}>
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>HOW IT BEGAN</span>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", textWrap: "balance" }}>From promising pilots to systems people rely on.</h2>
@@ -39,7 +39,7 @@ export function AboutPage() {
 </section>
 
 <section style={{ background: "#0E1116", color: "#ffffff" }}>
-<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "140px 40px", display: "flex", flexDirection: "column", gap: "64px" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "64px" }}>
 <div data-reveal="1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "48px", alignItems: "center" }}>
 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>THE NAME</span>
@@ -57,7 +57,7 @@ export function AboutPage() {
 </div>
 </section>
 
-<section style={{ maxWidth: "1360px", margin: "0 auto", padding: "140px 40px", display: "flex", flexDirection: "column", gap: "56px" }}>
+<section style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "56px" }}>
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>WHAT WE STAND FOR</span>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Principles we build by.</h2>
@@ -75,7 +75,7 @@ export function AboutPage() {
 
 <section style={{ background: "#1670A6", color: "#ffffff", position: "relative", overflow: "hidden" }}>
 <img data-spin="1" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-120px", bottom: "-200px", width: "520px", opacity: ".12", pointerEvents: "none" }} />
-<div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "120px 40px", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
+<div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(72px,9vw,120px) clamp(20px,5vw,40px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Have something worth building? Let’s talk.</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
 <a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">✉ Email us</a>

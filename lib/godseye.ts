@@ -86,6 +86,14 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
       c.onmouseenter = () => css(c, { borderColor: L, color: L }); c.onmouseleave = () => css(c, { borderColor: LINE, color: "#d4dae2" }); c.onclick = () => ask(s);
       sugg.appendChild(c);
     });
+    const fit = () => {
+      const sm = innerWidth < 640;
+      $("[data-g-lbl]").style.display = sm ? "none" : "";
+      Object.assign($("[data-g-btn]").style, sm ? { padding: "0 8px", height: "56px" } : { padding: "0 20px 0 8px" });
+      Object.assign(root.style, sm ? { right: "16px", bottom: "16px" } : { right: "24px", bottom: "24px" });
+      Object.assign(panel.style, sm ? { width: "calc(100vw - 32px)", height: "calc(100vh - 110px)" } : { width: "min(370px,calc(100vw - 32px))", height: "min(520px,calc(100vh - 140px))" });
+    };
+    fit(); addEventListener("resize", fit);
     bubble("bot", "Hi, I'm Godseye. Ask me anything about Trikhya Intelligence Foundry.");
     $("[data-g-btn]").onclick = () => setOpen(!open); $("[data-g-close]").onclick = () => setOpen(false);
     ($("[data-g-form]") as HTMLFormElement).onsubmit = (e) => { e.preventDefault(); ask(input.value); };
