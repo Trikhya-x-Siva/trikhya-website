@@ -9,3 +9,8 @@ input, textarea, button { font: inherit; }
 
 /* Pre-paint cover for the page-wipe transition; removed by the motion engine once its own overlay is in place. */
 html.wipe-in::after { content: ""; position: fixed; inset: 0; z-index: 400; background: #1670A6 var(--wipe-mark) center / 72px no-repeat; }
+
+/* Custom cursor: black arrow with a light-blue gradient edge; inverted over interactive elements. */
+html, body { cursor: url(../public/cursor.png) 2 2, auto; }
+a, button, [role="button"], input[type="submit"], label { cursor: url(../public/cursor-link.png) 2 2, pointer; }
+input, textarea { cursor: url(../public/cursor-link.png) 2 2, text; }

@@ -33,8 +33,31 @@ export function AboutPage() {
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", textWrap: "balance" }}>From promising pilots to systems people rely on.</h2>
 </div>
 <div style={{ display: "flex", flexDirection: "column", gap: "24px", fontSize: "20px", lineHeight: "1.6", color: "#3b4350" }}>
-<p data-reveal="1" style={{ margin: "0", textWrap: "pretty" }}>[Founding story placeholder.] Trikhya was founded by engineers who had watched too many AI initiatives stall between the demo and the day-to-day. The technology was ready. What was missing was the craft of fitting it into how a business actually works.</p>
-<p data-fill="1" style={{ margin: "0", textWrap: "pretty", color: "#0E1116" }}>So we set up as a foundry: a place where raw capability is shaped into something solid and dependable. We work closely with the people who own a problem, engineer the intelligence that solves it, and hand it back in a form they can trust.</p>
+<p data-reveal="1" style={{ margin: "0", textWrap: "pretty" }}>Most AI initiatives fail because they lack an engineering backbone. They are prototypes, not products. Trikhya Intelligence Foundry is where AI vision becomes engineering reality.</p>
+<p data-fill="1" style={{ margin: "0", textWrap: "pretty", color: "#0E1116" }}>We specialise in Domain Intelligence Accelerators and Specialized Workflows that multiply operational efficiency. We do not just deploy models. We establish a sustainable three-way interaction model, B-AI-B and B-AI-C, that keeps humans in the loop and AI in production.</p>
+</div>
+</section>
+
+<section style={{ background: "#E7ECF1" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "56px" }}>
+<div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "760px" }}>
+<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>WHAT WE SOLVE</span>
+<h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: 800, letterSpacing: "-.035em", textWrap: "balance" }}>Three failure modes we are built to end.</h2>
+</div>
+<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "20px" }}>
+{[
+  { n: "01", title: "The prototype trap", body: "Moving beyond basic chatbots to production-ready agentic architectures that survive contact with real data and real users." },
+  { n: "02", title: "Information silos", body: "Unifying domain intelligence across manufacturing, IoT and professional services so one question can draw on every system." },
+  { n: "03", title: "Operational friction", body: "Reducing human overhead through autonomous, high-retention workflows that hand off to people only when it matters." },
+].map((c, i) => (
+<div key={i} data-reveal="1" data-tilt="1" style={{ background: "#ffffff", padding: "32px 28px", display: "flex", flexDirection: "column", gap: "14px", borderTop: "4px solid #1670A6" }}>
+<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", color: "#5b6370", letterSpacing: ".12em" }}>{c.n}</span>
+<span style={{ fontSize: "24px", fontWeight: 700 }}>{c.title}</span>
+<span style={{ fontSize: "16px", lineHeight: "1.55", color: "#4a5260" }}>{c.body}</span>
+</div>
+))}
+</div>
+<div data-reveal="1"><a href={withBase("/solutions/")} style={{ fontWeight: 700, fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>Explore our Domain Intelligence Accelerators →</a></div>
 </div>
 </section>
 

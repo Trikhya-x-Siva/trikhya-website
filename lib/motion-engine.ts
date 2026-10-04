@@ -166,7 +166,7 @@ export function initMotion({ markWhite, markBlue }: Opts) {
   };
 
   /* ---------- scroll-driven ---------- */
-  let bar: HTMLElement | null = null, brand: HTMLElement | null = null, ticking = false;
+  let bar: HTMLElement | null = null, brand: HTMLElement | null = null, ticking = false, magnetsBound = false;
   const update = () => {
     ticking = false;
     const vh = innerHeight, narrow = innerWidth < 900;
@@ -208,24 +208,15 @@ export function initMotion({ markWhite, markBlue }: Opts) {
       Object.assign(bar.style, { position: "fixed", left: "0", top: "0", height: "3px", width: "100%", background: L, transformOrigin: "left", transform: "scaleX(0)", zIndex: "200", pointerEvents: "none" });
       document.body.appendChild(bar);
     }
-    if (fine && !reduce && !document.querySelector("[data-cursor-ring]")) {
-      const ring = document.createElement("div"); ring.setAttribute("data-cursor-ring", "");
-      Object.assign(ring.style, { position: "fixed", left: "0", top: "0", width: "34px", height: "34px", margin: "-17px 0 0 -17px", border: `1.5px solid ${L}`, borderRadius: "50%", pointerEvents: "none", zIndex: "300", opacity: "0", transition: "width .25s, height .25s, margin .25s, background .25s, opacity .2s" });
-      document.body.appendChild(ring);
-      let tx = 0, ty = 0, x = 0, y = 0;
+    if (fine && !reduce && !magnetsBound) {
+      magnetsBound = true;
       addEventListener("mousemove", (e) => {
-        tx = e.clientX; ty = e.clientY; ring.style.opacity = "1";
-        const t = e.target as Element | null;
-        const over = t && t.closest && t.closest("a,button,input,textarea,[data-hit]");
-        Object.assign(ring.style, over ? { width: "60px", height: "60px", margin: "-30px 0 0 -30px", background: "rgba(79,184,238,.14)" } : { width: "34px", height: "34px", margin: "-17px 0 0 -17px", background: "transparent" });
-        for (const m of magnets) {
-          if (!m.isConnected) continue;
-          const r = m.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-          m.style.transform = Math.hypot(dx, dy) < Math.max(110, r.width) ? `translate(${dx * 0.25}px,${dy * 0.3}px)` : "";
+        for (const mg of magnets) {
+          if (!mg.isConnected) continue;
+          const r = mg.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+          mg.style.transform = Math.hypot(dx, dy) < Math.max(110, r.width) ? `translate(${dx * 0.25}px,${dy * 0.3}px)` : "";
         }
       });
-      document.addEventListener("mouseleave", () => (ring.style.opacity = "0"));
-      (function loop() { x += (tx - x) * 0.2; y += (ty - y) * 0.2; ring.style.transform = `translate(${x}px,${y}px)`; requestAnimationFrame(loop); })();
     }
     if (!document.querySelector("[data-page-wipe]")) {
       const w = document.createElement("div"); w.setAttribute("data-page-wipe", "");

@@ -53,7 +53,6 @@ export function CareersPage() {
 </a>
 </Fragment>))}
 </div>
-<p data-reveal="1" style={{ margin: "0", fontSize: "18px", color: "#aab3bf" }}>Don’t see your role? Write to <a href="mailto:careers@trikhya.ai" style={{ color: "#4FB8EE" }}>careers@trikhya.ai</a>.</p>
 </div>
 </section>
     </div>
