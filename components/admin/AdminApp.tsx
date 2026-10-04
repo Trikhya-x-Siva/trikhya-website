@@ -64,27 +64,65 @@ function Brand() {
 }
 
 function Login() {
+  const [mode, setMode] = useState<"password" | "link">("password");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [err, setErr] = useState("");
   const submit = async (e: FormEvent) => {
-    e.preventDefault(); setState("sending");
-    const { error } = await supabase()!.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-    if (error) { setErr(error.message); setState("error"); } else setState("sent");
+    e.preventDefault(); setState("sending"); setErr("");
+    const sb = supabase()!;
+    const { error } = mode === "password"
+      ? await sb.auth.signInWithPassword({ email, password })
+      : await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
+    if (error) { setErr(error.message.replace(/^For security purposes, /, "")); setState("error"); }
+    else setState(mode === "link" ? "sent" : "idle");
   };
   return (
     <Panel>
-      <Label>Sign in</Label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <Label>Sign in</Label>
+        <div style={{ display: "flex", gap: 6 }}>
+          <Pill on={mode === "password"} onClick={() => { setMode("password"); setState("idle"); }}>Password</Pill>
+          <Pill on={mode === "link"} onClick={() => { setMode("link"); setState("idle"); }}>Email link</Pill>
+        </div>
+      </div>
       {state === "sent" ? (
         <span style={{ fontSize: 16, lineHeight: 1.5, color: C.mid }}>Check your inbox. We sent a sign-in link to <b style={{ color: C.ink }}>{email}</b>. Open it on this device.</span>
       ) : (
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Enter your Trikhya email. You will get a one-time link, no password.</span>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
-          <button type="submit" disabled={state === "sending"} style={btn}>{state === "sending" ? "Sending…" : "Send sign-in link"}</button>
-          {state === "error" ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err.replace(/^For security purposes, /, "")}</span> : null}
+          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>
+            {mode === "password" ? "Use the password you set from the dashboard menu." : "You will get a one-time link by email. The free mail sender allows only a few per hour, so prefer a password once you have set one."}
+          </span>
+          <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
+          {mode === "password" ? <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="adm-in" style={input} /> : null}
+          <button type="submit" disabled={state === "sending"} style={btn}>{state === "sending" ? "Signing in…" : mode === "password" ? "Sign in" : "Send sign-in link"}</button>
+          {state === "error" ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err}</span> : null}
         </form>
       )}
+    </Panel>
+  );
+}
+
+/** Lets a signed-in admin set or change their password, so email is not needed for later sign-ins. */
+function SetPassword({ onDone }: { onDone: () => void }) {
+  const [pw, setPw] = useState("");
+  const [msg, setMsg] = useState("");
+  const [busy, setBusy] = useState(false);
+  const submit = async (e: FormEvent) => {
+    e.preventDefault(); if (pw.length < 10) { setMsg("Use at least 10 characters."); return; }
+    setBusy(true);
+    const { error } = await supabase()!.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) setMsg(error.message); else { setMsg("Password saved. Use it next time you sign in."); setPw(""); setTimeout(onDone, 1800); }
+  };
+  return (
+    <Panel title="Set a password" right={<Pill onClick={onDone}>Close</Pill>}>
+      <form onSubmit={submit} style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+        <input type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="New password, 10+ characters" className="adm-in" style={{ ...input, width: "min(360px,100%)" }} />
+        <button type="submit" disabled={busy} style={btn}>{busy ? "Saving…" : "Save password"}</button>
+        {msg ? <span style={{ fontSize: 13, color: msg.startsWith("Password saved") ? C.green : C.amber }}>{msg}</span> : null}
+      </form>
     </Panel>
   );
 }
@@ -96,6 +134,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
   const [error, setError] = useState("");
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [pagePick, setPagePick] = useState<string | null>(null);
+  const [showPw, setShowPw] = useState(false);
 
   const refresh = () => { loadEvents(days).then((e) => { setEvents(e); setError(""); setRefreshedAt(new Date()); }).catch((e) => setError(String(e.message || e))); };
   useEffect(refresh, [days]);
@@ -115,6 +154,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
               <span style={{ fontFamily: MONO, fontSize: 12, color: C.dim }}>{refreshedAt ? `UPDATED ${refreshedAt.toLocaleTimeString("en-GB")}` : "LOADING"}</span>
               <Pill onClick={refresh}>Refresh</Pill>
               <span style={{ fontSize: 13, color: C.dim }}>{email}</span>
+              <Pill onClick={() => setShowPw((v) => !v)}>Set password</Pill>
               <Pill onClick={onSignOut}>Sign out</Pill>
             </div>
           </div>
@@ -125,6 +165,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
       </header>
 
       <main style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 28px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
+        {showPw ? <SetPassword onDone={() => setShowPw(false)} /> : null}
         {error ? <Panel><Empty text={`Could not load events: ${error}. Has the SQL migration been run in Supabase (${SUPABASE_URL})?`} /></Panel> : null}
         {!agg ? <Empty text="Loading events…" /> : (
           <>
