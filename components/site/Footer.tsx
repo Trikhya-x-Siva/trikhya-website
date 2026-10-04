@@ -20,9 +20,9 @@ export function Footer() {
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16, paddingTop: 24, borderTop: "1px solid #222831", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6f7986" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px 28px", paddingTop: 24, paddingRight: 260, borderTop: "1px solid #222831", fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6f7986" }}>
           <span>© 2026 Trikhya Intelligence Foundry</span>
-          <span style={{ display: "flex", gap: 18 }}>
+          <span style={{ display: "flex", gap: 18, color: "#aab3bf" }}>
             <a href={withBase("/privacy/")} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Privacy</a>
             <a href={withBase("/terms/")} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Terms</a>
             <a href={withBase("/privacy/#cookies")} onClick={(e) => { e.preventDefault(); dispatchEvent(new Event("trikhya:cookies")); }} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Cookies</a>
