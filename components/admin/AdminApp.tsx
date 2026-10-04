@@ -6,10 +6,10 @@ import { supabase, SUPABASE_URL } from "@/lib/supabase";
 import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 import { JOBS } from "@/content/jobs";
-import { aggregate, loadEvents, RANGES, type Agg, type Ev } from "./data";
+import { aggregate, loadEvents, pageName, RANGES, type Agg, type Ev } from "./data";
 import { Bars, C, Chart, Empty, fmt, Kpi, Label, MONO, Panel, pct, Pill, SANS, secs, Table } from "./ui";
 
-const TABS = ["Overview", "Pages", "Careers", "Godseye", "Audience", "Live"] as const;
+const TABS = ["Overview", "Pages", "Careers", "Godseye", "Audience", "Live", "Admins"] as const;
 type Tab = (typeof TABS)[number];
 
 export function AdminApp() {
@@ -64,24 +64,42 @@ function Brand() {
 }
 
 function Login() {
+  const [mode, setMode] = useState<"signin" | "create">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [note, setNote] = useState("");
   const submit = async (e: FormEvent) => {
-    e.preventDefault(); setBusy(true); setErr("");
-    const { error } = await supabase()!.auth.signInWithPassword({ email, password });
+    e.preventDefault(); setBusy(true); setErr(""); setNote("");
+    const sb = supabase()!;
+    if (mode === "create") {
+      const { data: ok } = await sb.rpc("is_allowlisted", { check_email: email });
+      if (!ok) { setErr("That email is not on the admin list. Ask an existing admin to add it first."); setBusy(false); return; }
+      if (password.length < 10) { setErr("Use at least 10 characters."); setBusy(false); return; }
+      const { data, error } = await sb.auth.signUp({ email, password });
+      setBusy(false);
+      if (error) setErr(error.message);
+      else if (data.user && !data.session) setNote("Account created. Email confirmation is switched on in Supabase, so check your inbox once, then sign in.");
+      return;
+    }
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) setErr(error.message === "Invalid login credentials" ? "That email and password do not match." : error.message);
   };
   return (
     <Panel>
-      <Label>Sign in</Label>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <Label>{mode === "signin" ? "Sign in" : "Create account"}</Label>
+        <Pill onClick={() => { setMode(mode === "signin" ? "create" : "signin"); setErr(""); setNote(""); }}>{mode === "signin" ? "First time? Create account" : "Back to sign in"}</Pill>
+      </div>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {mode === "create" ? <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Only emails already added by an admin can create an account.</span> : null}
         <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
-        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="adm-in" style={input} />
-        <button type="submit" disabled={busy} style={btn}>{busy ? "Signing in…" : "Sign in"}</button>
+        <input type="password" required autoComplete={mode === "create" ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "create" ? "Choose a password, 10+ characters" : "Password"} className="adm-in" style={input} />
+        <button type="submit" disabled={busy} style={btn}>{busy ? "Please wait…" : mode === "create" ? "Create account" : "Sign in"}</button>
         {err ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err}</span> : null}
+        {note ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.green }}>{note}</span> : null}
       </form>
     </Panel>
   );
@@ -158,6 +176,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
             {tab === "Godseye" ? <Godseye a={agg} /> : null}
             {tab === "Audience" ? <Audience a={agg} /> : null}
             {tab === "Live" ? <Live events={events!} /> : null}
+            {tab === "Admins" ? <Admins me={email} /> : null}
           </>
         )}
       </main>
@@ -181,10 +200,10 @@ function Overview({ a, days, onPage }: { a: Agg; days: number; onPage: (p: strin
       <Panel title="Views and sessions per day"><Chart series={a.series} /></Panel>
       <div style={grid(360)}>
         <Panel title="Top pages" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>CLICK FOR DETAIL</span>}>
-          <Bars rows={a.pageRows.slice(0, 10).map((p) => ({ key: p.path, count: p.views }))} max={10} onPick={onPage} />
+          <Bars rows={a.pageRows.slice(0, 10).map((p) => ({ key: pageName(p.path), count: p.views }))} max={10} onPick={(k) => { const r = a.pageRows.find((p) => pageName(p.path) === k); if (r) onPage(r.path); }} />
         </Panel>
         <Panel title="Where visitors came from"><Bars rows={a.referrers} /></Panel>
-        <Panel title="Landing pages"><Bars rows={a.landing} /></Panel>
+        <Panel title="Landing pages"><Bars rows={a.landing.map((r) => ({ ...r, key: pageName(r.key) }))} /></Panel>
       </div>
     </>
   );
@@ -195,12 +214,12 @@ function Pages({ a, pick, setPick }: { a: Agg; pick: string | null; setPick: (p:
   return (
     <>
       <Panel title="Every page" right={pick ? <Pill onClick={() => setPick(null)}>All pages</Pill> : null}>
-        <Table head={["Page", "Views", "Sessions", "Avg time", "Scroll", "Clicks", "Exits"]} rows={a.pageRows.map((p) => [p.path, fmt(p.views), fmt(p.sessions), secs(p.seconds), `${Math.round(p.scroll)}%`, fmt(p.clicks), fmt(p.exits)])} onRow={(i) => setPick(a.pageRows[i].path)} />
+        <Table head={["Page", "Views", "Sessions", "Avg time", "Scroll", "Clicks", "Exits"]} rows={a.pageRows.map((p) => [pageName(p.path), fmt(p.views), fmt(p.sessions), secs(p.seconds), `${Math.round(p.scroll)}%`, fmt(p.clicks), fmt(p.exits)])} onRow={(i) => setPick(a.pageRows[i].path)} />
       </Panel>
       {row ? (
         <div style={grid(360)}>
-          <Panel title={`Interactions on ${row.path}`} right={<span style={{ fontSize: 13, color: C.dim }}>{row.title}</span>}>
-            <Bars rows={a.interactions.get(row.path) ?? []} max={25} />
+          <Panel title={`Interactions on ${pageName(row.path)}`} right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{row.path}</span>}>
+            <Bars rows={(a.interactions.get(row.path) ?? []).map((r) => ({ ...r, key: r.key.length > 48 ? r.key.slice(0, 46) + "…" : r.key }))} max={25} />
           </Panel>
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <Kpi label="Views" value={fmt(row.views)} sub={`${row.sessions} sessions`} />
@@ -226,7 +245,6 @@ function Careers({ a }: { a: Agg }) {
         <Kpi label="Apply clicks" value={fmt(totals.applies)} accent={C.green} sub={pct(totals.opens ? totals.applies / totals.opens : 0) + " of opens"} />
       </div>
       <Panel title="Per role"><Table head={["Role", "Opened", "Link copied", "Apply clicked", "Apply rate"]} rows={rows} /></Panel>
-      <Panel title="Interactions on the careers page"><Bars rows={careers ? a.interactions.get(careers.path) ?? [] : []} max={20} /></Panel>
     </>
   );
 }
@@ -241,7 +259,7 @@ function Godseye({ a }: { a: Agg }) {
         <Kpi label="Sessions that asked" value={fmt(new Set(qs.map((q) => q.session_id)).size)} />
       </div>
       <Panel title="Every question" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>NEWEST FIRST</span>}>
-        <Table head={["Question", "Page", "When"]} rows={qs.map((q) => [String(q.props.q ?? ""), q.path, new Date(q.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })])} />
+        <Table head={["Question", "Page", "When"]} rows={qs.map((q) => [String(q.props.q ?? ""), pageName(q.path), new Date(q.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })])} />
       </Panel>
     </>
   );
@@ -262,7 +280,52 @@ function Live({ events }: { events: Ev[] }) {
   const recent = events.slice(0, 150);
   return (
     <Panel title="Most recent events" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>AUTO-REFRESHES EVERY MINUTE</span>}>
-      <Table head={["Event", "Page", "Detail", "Session", "When"]} rows={recent.map((e) => [e.name, e.path, e.name === "click" ? String(e.props.label ?? e.props.href ?? "") : e.name === "page_leave" ? `${e.props.seconds}s · ${e.props.scroll}%` : e.name === "godseye_question" ? String(e.props.q ?? "") : String(e.props.job ?? ""), e.session_id.slice(0, 6), new Date(e.ts).toLocaleTimeString("en-GB")])} />
+      <Table head={["Event", "Page", "Detail", "Session", "When"]} rows={recent.map((e) => [e.name, pageName(e.path), e.name === "click" ? String(e.props.label ?? e.props.href ?? "") : e.name === "page_leave" ? `${e.props.seconds}s · ${e.props.scroll}%` : e.name === "godseye_question" ? String(e.props.q ?? "") : String(e.props.job ?? ""), e.session_id.slice(0, 6), new Date(e.ts).toLocaleTimeString("en-GB")])} />
     </Panel>
+  );
+}
+
+function Admins({ me }: { me: string }) {
+  const [rows, setRows] = useState<{ email: string; added_at: string }[] | null>(null);
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const load = () => { supabase()!.from("admins").select("email, added_at").order("added_at").then(({ data, error }) => { if (error) setMsg(error.message); else setRows(data ?? []); }); };
+  useEffect(load, []);
+  const add = async (e: FormEvent) => {
+    e.preventDefault(); setMsg("");
+    const { error } = await supabase()!.from("admins").insert({ email: email.trim().toLowerCase() });
+    if (error) setMsg(error.message.includes("duplicate") ? "That email is already an admin." : error.message); else { setEmail(""); setMsg("Added. They can now create their login from the sign-in screen."); load(); }
+  };
+  const remove = async (target: string) => {
+    if (!confirm(`Remove ${target} from the admin list? Their login will stop working.`)) return;
+    const { error } = await supabase()!.from("admins").delete().eq("email", target);
+    if (error) setMsg(error.message); else load();
+  };
+  return (
+    <div style={grid(420)}>
+      <Panel title="Add an admin">
+        <form onSubmit={add} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Add a teammate&apos;s email. They then open the admin sign-in page, choose “Create account”, and set their own password. Only emails on this list can create an account or sign in.</span>
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@trikhya.ai" className="adm-in" style={input} />
+          <button type="submit" style={btn}>Add admin</button>
+          {msg ? <span style={{ fontSize: 13, color: msg.startsWith("Added") ? C.green : C.amber }}>{msg}</span> : null}
+        </form>
+      </Panel>
+      <Panel title="Current admins" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{rows?.length ?? 0} TOTAL</span>}>
+        {!rows ? <Empty text="Loading…" /> : (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {rows.map((r) => (
+              <div key={r.email} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "12px 4px", borderBottom: `1px solid ${C.line}` }}>
+                <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <span style={{ fontSize: 15 }}>{r.email}{r.email.toLowerCase() === me.toLowerCase() ? <span style={{ fontFamily: MONO, fontSize: 11, color: C.sky, marginLeft: 10 }}>YOU</span> : null}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>ADDED {new Date(r.added_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase()}</span>
+                </span>
+                {r.email.toLowerCase() !== me.toLowerCase() ? <Pill onClick={() => remove(r.email)}>Remove</Pill> : null}
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
   );
 }

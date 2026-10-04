@@ -1,6 +1,8 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import { INSIGHTS } from "@/content/insights";
+import { NLQ } from "@/content/nlq";
 
 export type Ev = {
   id: number; ts: string; session_id: string; visitor_id: string | null; name: string; path: string; title: string | null;
@@ -25,6 +27,15 @@ export async function loadEvents(days: number): Promise<Ev[]> {
 
 const n = (v: unknown) => (typeof v === "number" ? v : Number(v) || 0);
 const host = (u: string | null) => { try { return u ? new URL(u).host.replace(/^www\./, "") : ""; } catch { return ""; } };
+/** Human name for a path, basePath-agnostic. */
+export function pageName(path: string) {
+  const p = path.replace(/^\/trikhya-website/, "").replace(/\/+$/, "") || "/";
+  const fixed: Record<string, string> = { "/": "Home", "/services": "Services", "/solutions": "Solutions", "/about": "About", "/insights": "Insights", "/careers": "Careers", "/contact": "Contact", "/privacy": "Privacy policy", "/terms": "Terms of use", "/admin": "Admin" };
+  if (fixed[p]) return fixed[p];
+  if (p === NLQ.href.replace(/\/$/, "")) return `Solution · ${NLQ.title}`;
+  const ins = INSIGHTS.find((i) => p === `/insights/${i.slug}`); if (ins) return `Insight · ${ins.title}`;
+  return p;
+}
 export const device = (w: number | null) => (w == null ? "unknown" : w < 768 ? "mobile" : w < 1200 ? "tablet / small laptop" : "desktop");
 
 export type PageRow = { path: string; title: string; views: number; sessions: number; seconds: number; scroll: number; clicks: number; exits: number };

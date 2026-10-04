@@ -28,7 +28,8 @@ export const PRIVACY: LegalDoc = {
         "Contact form and email: your name, work email, company, and whatever you write in the message. We use it to answer your enquiry and, if you ask us to, to follow up about working together.",
         "Job applications: your name, contact details, CV and anything else you choose to send. We use it to assess your application for the role you applied to.",
         "Godseye assistant: the questions you type into the on-page assistant are answered in your browser from a fixed set of responses. They are not sent to us or to any third party and are not stored after you close the page.",
-        "Technical data: our hosting provider records standard server logs (IP address, browser type, pages requested, time) to serve the site and keep it secure. We do not run analytics or advertising trackers.",
+        "Usage measurement: we record, ourselves, which pages are viewed, how long they are read, and which links and buttons are clicked. Each visit is identified only by a random id that lasts for the browser tab. We do not use Google Analytics or any advertising tracker, and nothing is shared with third parties.",
+        "Technical data: our hosting provider records standard server logs (IP address, browser type, pages requested, time) to serve the site and keep it secure.",
       ],
     },
     {
@@ -64,15 +65,17 @@ export const PRIVACY: LegalDoc = {
       id: "cookies",
       title: "Cookies and local storage",
       paras: [
-        "This website sets no advertising or analytics cookies. It uses a small amount of browser storage that is strictly necessary for the site to work as designed:",
+        "This website sets no advertising cookies and loads no third-party analytics. Usage is measured by our own code and stored in our own database. The browser storage involved is:",
       ],
       items: [
         "trikhya-consent (local storage): records the choice you made in the cookie notice so we do not ask again. Kept for 12 months.",
+        "trikhya-session (session storage): a random id for the current browser tab so that page views in one visit can be counted together. Gone when the tab closes.",
+        "trikhya-visitor (local storage): set only if you chose “Accept”. A random id that lets us recognise a returning browser. Kept for 12 months and never linked to your name or email.",
         "trikhya-wipe (session storage): tells the next page that a page transition is in progress so the animation plays once. Cleared immediately on arrival.",
         "trikhya-motion (local storage): an optional setting that switches the site to reduced motion. Only present if you set it.",
       ],
       after: [
-        "Because none of this storage tracks you or is shared with anyone, the notice you see on your first visit is informational. Choosing “Essential only” and “Accept” result in the same experience today. If we ever add analytics, they will load only after you accept, and this page will be updated first.",
+        "Choosing “Essential only” keeps every visit anonymous: pages and clicks are still counted, but nothing connects one visit to the next. Choosing “Accept” additionally sets the returning-visitor id described above.",
         "You can clear all of this at any time from your browser settings, or reopen the notice from the “Cookies” link in the footer.",
       ],
     },
