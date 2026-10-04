@@ -35,7 +35,10 @@ If the question is not about Trikhya (weather, general knowledge, coding help, o
 If the visitor asks to talk to a person, quote a price, or something the knowledge does not cover, answer briefly with what you know and point them to the Contact page.
 Reply in 1 to 3 short sentences, plain English, no markdown, no emojis.
 
-Return ONLY JSON: {"in_scope": true|false, "answer": "..."}. When in_scope is false, set answer to an empty string.
+Also classify the question into exactly one topic from this list:
+company (who Trikhya is, history, location, team), services (what Trikhya offers, how it works with clients, timelines), solutions (things built, the query assistant, results, accuracy), approach (human-AI-human, B-AI-B, B-AI-C, methods), hiring (jobs, careers, applying), contact (reaching a person, demos, meetings), pricing (cost, quotes, budgets), insights (articles, write-ups), greeting (hello, thanks, small talk about the assistant), out_of_scope (anything not about Trikhya).
+
+Return ONLY JSON: {"in_scope": true|false, "topic": "<one of the list>", "answer": "..."}. When in_scope is false, topic is "out_of_scope" and answer is an empty string.
 
 KNOWLEDGE
 ${s.knowledge}
@@ -43,13 +46,14 @@ ${docsText}`;
 
     const turns: Turn[] = (Array.isArray(history) ? history : []).slice(-8).filter((h: Turn) => h && (h.role === "user" || h.role === "assistant") && typeof h.content === "string").map((h: Turn) => ({ role: h.role, content: h.content.slice(0, 600) }));
     const raw = await chat(s.provider, s.model, [{ role: "system", content: system }, ...turns, { role: "user", content: q }], 350, 0.2);
-    let in_scope = true, answer = "";
-    try { const j = parseJson<{ in_scope: boolean; answer: string }>(raw); in_scope = j.in_scope !== false; answer = String(j.answer ?? "").trim(); }
+    const TOPICS = ["company", "services", "solutions", "approach", "hiring", "contact", "pricing", "insights", "greeting", "out_of_scope"];
+    let in_scope = true, answer = "", topic = "company";
+    try { const j = parseJson<{ in_scope: boolean; answer: string; topic?: string }>(raw); in_scope = j.in_scope !== false; answer = String(j.answer ?? "").trim(); if (j.topic && TOPICS.includes(j.topic)) topic = j.topic; }
     catch { answer = raw.trim(); }
-    if (!in_scope || !answer) { in_scope = false; answer = s.refusal; }
+    if (!in_scope || !answer) { in_scope = false; answer = s.refusal; topic = "out_of_scope"; }
 
     const latency_ms = Date.now() - t0;
-    await sb.from("godseye_conversations").insert({ session_id, path, question: q, answer, in_scope, latency_ms, model: `${s.provider}/${s.model}` });
+    await sb.from("godseye_conversations").insert({ session_id, path, question: q, answer, in_scope, topic, latency_ms, model: `${s.provider}/${s.model}` });
     return json({ answer, in_scope, latency_ms });
   } catch (e) {
     return json({ fallback: true, error: String((e as Error).message) }, 200);

@@ -2,14 +2,31 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { C, Empty, fmt, Kpi, Label, MONO, Panel, Pill, Table } from "./ui";
+import { Bars, C, Empty, fmt, Kpi, Label, MONO, Panel, Pill, Table } from "./ui";
 
 const input: React.CSSProperties = { font: "inherit", fontSize: 15, padding: "11px 13px", background: C.bg, border: `1px solid ${C.line}`, color: C.ink, outline: "none", width: "100%", boxSizing: "border-box", borderRadius: 0 };
 const btn: React.CSSProperties = { font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" };
 const grid = (min: number): React.CSSProperties => ({ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${min}px,1fr))`, gap: 20 });
 
 type Settings = { enabled: boolean; provider: string; model: string; knowledge: string; refusal: string; handoff: string; starter_questions: string[]; daily_cap: number; max_turns: number; updated_at?: string };
-type Conv = { id: number; ts: string; session_id: string; path: string | null; question: string; answer: string; in_scope: boolean; latency_ms: number | null; model: string | null; flagged: boolean; flag_note: string | null };
+type Conv = { id: number; ts: string; session_id: string; path: string | null; question: string; answer: string; in_scope: boolean; topic: string | null; latency_ms: number | null; model: string | null; flagged: boolean; flag_note: string | null };
+
+const TOPIC_LABEL: Record<string, string> = { company: "About the company", services: "Services and engagement", solutions: "What we have built", approach: "Approach (H-AI-H)", hiring: "Hiring and careers", contact: "Contact and demos", pricing: "Pricing", insights: "Insights", greeting: "Greetings and small talk", out_of_scope: "Out of scope" };
+/** Topic for a conversation: the model's tag, or a keyword guess for rows recorded before tagging existed. */
+function topicOf(c: Conv): string {
+  if (c.topic) return c.topic;
+  if (!c.in_scope) return "out_of_scope";
+  const q = c.question.toLowerCase();
+  if (/hir|job|career|role|apply|vacanc|intern/.test(q)) return "hiring";
+  if (/price|cost|quote|budget|charge|fee/.test(q)) return "pricing";
+  if (/contact|email|call|meet|demo|talk|reach|phone/.test(q)) return "contact";
+  if (/built|solution|product|query|assistant|accuracy|client|case|project/.test(q)) return "solutions";
+  if (/h-?ai-?h|human|b-?ai-?[bc]|approach|method|process/.test(q)) return "approach";
+  if (/service|offer|engage|timeline|how long|deliver|do you do/.test(q)) return "services";
+  if (/insight|article|blog|write/.test(q)) return "insights";
+  if (/^(hi|hello|hey|thanks|thank you|ok)/.test(q)) return "greeting";
+  return "company";
+}
 
 /** Godseye management: what it knows, how it refuses, whether it is on, and every conversation it has had. */
 export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
@@ -41,7 +58,8 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
 
   const today = (convs ?? []).filter((c) => c.ts.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
   const out = (convs ?? []).filter((c) => !c.in_scope).length;
-  const flagged = (convs ?? []).filter((c) => c.flagged).length;
+  const topicCounts = (() => { const m = new Map<string, number>(); (convs ?? []).forEach((c) => { const t = topicOf(c); m.set(t, (m.get(t) ?? 0) + 1); }); return [...m.entries()].map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count); })();
+  const topTopic = topicCounts.find((t) => t.key !== "out_of_scope") ?? topicCounts[0];
   const avgMs = (() => { const xs = (convs ?? []).map((c) => c.latency_ms ?? 0).filter(Boolean); return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0; })();
 
   return (
@@ -61,15 +79,18 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
       <div style={grid(200)}>
         <Kpi label="Conversations" value={fmt((convs ?? []).length)} sub="last 500" />
         <Kpi label="Today" value={fmt(today)} sub={s ? `cap ${s.daily_cap} per day` : ""} />
-        <Kpi label="Out of scope" value={fmt(out)} sub="refused politely" />
-        <Kpi label="Flagged wrong" value={fmt(flagged)} accent={flagged ? C.amber : undefined} />
+        <Kpi label="Out of scope" value={fmt(out)} sub={`${(convs ?? []).length ? Math.round((out / (convs ?? []).length) * 100) : 0}% of questions, refused politely`} />
+        <Kpi label="Most asked about" value={topTopic ? TOPIC_LABEL[topTopic.key] ?? topTopic.key : "—"} sub={topTopic ? `${topTopic.count} question${topTopic.count === 1 ? "" : "s"}` : "no questions yet"} />
         <Kpi label="Avg response" value={`${(avgMs / 1000).toFixed(1)}s`} />
       </div>
       <nav style={{ display: "flex", gap: 24, borderBottom: `1px solid ${C.line}` }}>
         {(["Conversations", "Knowledge", "Documents", "Behaviour"] as const).map((t) => <button key={t} className="adm-tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
       </nav>
 
-      {tab === "Conversations" ? (
+      {tab === "Conversations" ? (<>
+        <Panel title="What visitors ask about" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>LAST {(convs ?? []).length} QUESTIONS</span>}>
+          <Bars rows={topicCounts.map((t) => ({ key: TOPIC_LABEL[t.key] ?? t.key, count: t.count }))} max={10} />
+        </Panel>
         <Panel title="Every question and the answer given" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>CLICK A ROW TO FLAG OR UNFLAG</span>}>
           {flagging ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: 16, border: `1px solid ${C.amber}` }}>
@@ -84,10 +105,10 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
             </div>
           ) : null}
           {!convs ? <Empty text="Loading…" /> : !convs.length ? <Empty text="No conversations yet. Switch Godseye on and ask it something on the site." /> : (
-            <Table head={["Question", "Answer", "Scope", "When"]} rows={convs.map((c) => [`${c.flagged ? "⚑ " : ""}${c.question}`, c.answer.slice(0, 90) + (c.answer.length > 90 ? "…" : ""), c.in_scope ? "in" : "out", new Date(c.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })])} onRow={(i) => { setFlagging(convs[i]); setNote(convs[i].flag_note ?? ""); }} />
+            <Table head={["Question", "Answer", "Topic", "When"]} rows={convs.map((c) => [`${c.flagged ? "⚑ " : ""}${c.question}`, c.answer.slice(0, 90) + (c.answer.length > 90 ? "…" : ""), TOPIC_LABEL[topicOf(c)] ?? topicOf(c), new Date(c.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })])} onRow={(i) => { setFlagging(convs[i]); setNote(convs[i].flag_note ?? ""); }} />
           )}
         </Panel>
-      ) : null}
+      </>) : null}
 
       {tab === "Knowledge" && s ? (
         <Panel title="What Godseye knows" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{s.knowledge.length.toLocaleString()} CHARACTERS</span>}>
