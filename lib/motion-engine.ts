@@ -68,7 +68,23 @@ export function initMotion({ markWhite, markBlue }: Opts) {
       scrollers.add(el);
     },
     parallax(el) { if (!reduce) scrollers.add(el); },
-    pin(el) { scrollers.add(el); },
+    pin(el) {
+      // Autoplay instead of scroll-scrubbing: no sticky runway, no blank space to scroll through.
+      const steps = el.querySelectorAll<HTMLElement>("[data-pin-step]"), line = el.querySelector<HTMLElement>("[data-pin-line]");
+      el.style.height = "auto";
+      const sticky = el.firstElementChild as HTMLElement | null;
+      if (sticky) { sticky.style.position = "static"; sticky.style.top = ""; }
+      if (reduce) { steps.forEach((st) => (st.style.opacity = "1")); if (line) line.style.transform = "scaleX(1)"; return; }
+      steps.forEach((st) => { st.style.opacity = "0.28"; st.style.transition = "opacity .5s, transform .5s"; });
+      if (line) line.style.transform = "scaleX(0)";
+      onView(el, () => {
+        if (line) line.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: 1600, easing: E, fill: "forwards" });
+        steps.forEach((st, i) => setTimeout(() => {
+          st.style.opacity = "1"; st.style.transform = "translateY(-6px)";
+          setTimeout(() => (st.style.transform = "none"), 600);
+        }, 200 + i * 480));
+      });
+    },
     htrack(el) { scrollers.add(el); },
     magnet(el) {
       if (!fine || reduce) return;
@@ -173,17 +189,6 @@ export function initMotion({ markWhite, markBlue }: Opts) {
         const p = clamp((vh * 0.85 - r.top) / (vh * 0.5));
         const ws = el.querySelectorAll<HTMLElement>("[data-fw]");
         ws.forEach((w, i) => (w.style.opacity = (i + 1) / ws.length <= p + 0.02 ? "1" : "0.18"));
-      } else if (el.hasAttribute("data-pin")) {
-        const sticky = el.firstElementChild as HTMLElement | null, steps = el.querySelectorAll<HTMLElement>("[data-pin-step]"), line = el.querySelector<HTMLElement>("[data-pin-line]");
-        const grid = steps[0]?.parentElement, oneRow = grid ? getComputedStyle(grid).gridTemplateColumns.split(" ").length >= steps.length : true;
-        const sh = sticky ? sticky.offsetHeight : 0, top = Math.max(100, (vh - sh) / 2), off = narrow || !oneRow || sh + 100 > vh;
-        el.style.height = off ? "auto" : `calc(${sh}px + 90vh)`;
-        if (sticky) { sticky.style.position = off ? "static" : "sticky"; sticky.style.top = top + "px"; }
-        if (line) { line.style.display = off ? "none" : ""; const prev = line.previousElementSibling as HTMLElement | null; if (prev) prev.style.display = off ? "none" : ""; }
-        if (off) { steps.forEach((s) => (s.style.opacity = "1")); if (line) line.style.transform = "scaleX(1)"; return; }
-        const p = clamp(-r.top / Math.max(1, r.height - vh * 0.75)); const idx = Math.min(steps.length - 1, Math.floor(p * steps.length));
-        steps.forEach((s, i) => { s.style.transition = "opacity .4s, transform .4s"; s.style.opacity = i <= idx ? "1" : "0.28"; s.style.transform = i === idx ? "translateY(-6px)" : "none"; });
-        if (line) line.style.transform = `scaleX(${clamp(p * 1.05)})`;
       } else if (el.hasAttribute("data-htrack")) {
         const row = el.querySelector<HTMLElement>("[data-htrack-row]"); if (!row || !row.parentElement) return;
         const vis = row.parentElement.clientWidth, dist = Math.max(0, row.scrollWidth - vis);
@@ -231,7 +236,12 @@ export function initMotion({ markWhite, markBlue }: Opts) {
       try { came = sessionStorage.getItem("trikhya-wipe") === "1"; sessionStorage.removeItem("trikhya-wipe"); } catch { /* ignore */ }
       if (came && !reduce) {
         wipeDelay = 650; w.style.transform = "none";
+        // The JS overlay is now covering the page; drop the pre-paint CSS cover in the same frame, then slide out.
+        const dropCover = () => document.documentElement.classList.remove("wipe-in");
+        requestAnimationFrame(dropCover); setTimeout(dropCover, 100);
         setTimeout(() => w.animate([{ transform: "none" }, { transform: "translateY(-100%)" }], { duration: 700, easing: "cubic-bezier(.7,0,.3,1)", fill: "forwards" }), 120);
+      } else {
+        document.documentElement.classList.remove("wipe-in");
       }
       document.addEventListener("click", (e) => {
         const t = e.target as Element | null;
@@ -244,7 +254,9 @@ export function initMotion({ markWhite, markBlue }: Opts) {
         if (reduce) return;
         e.preventDefault();
         try { sessionStorage.setItem("trikhya-wipe", "1"); } catch { /* ignore */ }
-        w.animate([{ transform: "translateY(100%)" }, { transform: "none" }], { duration: 550, easing: "cubic-bezier(.7,0,.3,1)", fill: "forwards" }).finished.then(() => { location.href = url.href; });
+        let gone = false; const go = () => { if (!gone) { gone = true; location.href = url.href; } };
+        w.animate([{ transform: "translateY(100%)" }, { transform: "none" }], { duration: 550, easing: "cubic-bezier(.7,0,.3,1)", fill: "forwards" }).finished.then(go, go);
+        setTimeout(go, 800); // never leave the visitor stuck if the animation is throttled
       }, true);
       addEventListener("pageshow", (ev) => { if ((ev as PageTransitionEvent).persisted) w.getAnimations().forEach((a) => a.cancel()); });
     }

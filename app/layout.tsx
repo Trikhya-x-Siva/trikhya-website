@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Start covered when arriving via the page wipe, before anything paints. The motion engine takes over and slides the cover away. */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(sessionStorage.getItem('trikhya-wipe')==='1'){document.documentElement.classList.add('wipe-in');document.documentElement.style.setProperty('--wipe-mark','url(${withBase("/trikhya-mark-white.png")})')}}catch(e){}` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />

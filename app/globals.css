@@ -6,3 +6,6 @@ a:hover { color: #8fd3f7; }
 input, textarea, button { font: inherit; }
 ::selection { background: #4FB8EE; color: #0E1116; }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* Pre-paint cover for the page-wipe transition; removed by the motion engine once its own overlay is in place. */
+html.wipe-in::after { content: ""; position: fixed; inset: 0; z-index: 400; background: #1670A6 var(--wipe-mark) center / 72px no-repeat; }
