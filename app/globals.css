@@ -1,5 +1,6 @@
 /* Base styles from the Claude Design export. No framework reset: the pages carry their own inline styles. */
 html { scroll-behavior: smooth; }
+html, body { overflow-x: clip; }
 body { margin: 0; background: #0E1116; -webkit-font-smoothing: antialiased; font-family: 'Hanken Grotesk', sans-serif; }
 a { color: inherit; text-decoration: none; }
 a:hover { color: #8fd3f7; }
@@ -14,3 +15,45 @@ html.wipe-in::after { content: ""; position: fixed; inset: 0; z-index: 400; back
 html, body { cursor: url(../public/cursor.png) 2 2, auto; }
 a, button, [role="button"], input[type="submit"], label { cursor: url(../public/cursor-link.png) 2 2, pointer; }
 input, textarea { cursor: url(../public/cursor-link.png) 2 2, text; }
+
+/* ───────────── Responsive layer ─────────────
+ * The pages carry inline styles from the design export, so phone and tablet
+ * rules target those declarations directly. Desktop is untouched. */
+@media (max-width: 760px) {
+  /* Fixed-column grids collapse to one column; wide two-pane layouts stack. */
+  [style*="repeat(4,minmax(0,1fr))"], [style*="repeat(3,minmax(0,1fr))"],
+  [style*="minmax(0,760px) minmax(240px,1fr)"], [style*="minmax(200px,280px) minmax(0,760px)"],
+  [style*="minmax(0,1.1fr) minmax(0,1fr)"], [style*="repeat(auto-fit,minmax(280px,1fr))"],
+  [style*="repeat(auto-fit,minmax(300px,1fr))"], [style*="repeat(auto-fit,minmax(260px,1fr))"],
+  [style*="repeat(auto-fit,minmax(240px,1fr))"], [style*="repeat(auto-fit,minmax(200px,1fr))"] { grid-template-columns: 1fr !important; }
+  [style*="repeat(auto-fit,minmax(150px,1fr))"], [style*="repeat(auto-fit,minmax(140px,1fr))"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  aside[style*="sticky"], nav[style*="sticky"] { position: static !important; }
+  /* Column gaps designed for 1360px are too tall on a phone. */
+  [style*="gap: 64px"], [style*="gap: 56px"], [style*="gap: 48px"] { gap: 28px !important; }
+  /* Horizontal scroll-track becomes a plain swipe row. */
+  [data-htrack] { height: auto !important; }
+  [data-htrack] > div { position: static !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: none; }
+  [data-htrack] > div::-webkit-scrollbar { display: none; }
+  [data-htrack-row] { transform: none !important; }
+  [data-htrack-row] > * { scroll-snap-align: start; }
+  /* Cookie notice: a slim bar, not a card over the content. */
+  [aria-label="Cookie notice"] { left: 10px !important; right: 10px !important; bottom: 84px !important; width: auto !important; padding: 12px 14px !important; gap: 8px !important; }
+  [aria-label="Cookie notice"] p { font-size: 12.5px !important; line-height: 1.4 !important; }
+  [aria-label="Cookie notice"] button { padding: 8px 14px !important; font-size: 13px !important; }
+  /* Dialogs use the full phone width. */
+  div:has(> [role="dialog"][aria-modal="true"]) { padding: 10px !important; align-items: flex-end !important; }
+  [role="dialog"][aria-modal="true"] { border-radius: 14px !important; max-height: calc(100dvh - 20px) !important; }
+  [role="dialog"][aria-modal="true"] > div { padding-left: 18px !important; padding-right: 18px !important; }
+  [role="dialog"][aria-modal="true"] h3 { font-size: 24px !important; }
+  /* Tables scroll inside their panel instead of stretching the page. */
+  table { font-size: 13px; }
+  /* Admin role rows and question rows stack. */
+  [style*="minmax(0,2fr) minmax(0,1.4fr) repeat(3, 90px) auto"] { grid-template-columns: 1fr 1fr !important; }
+  [style*="minmax(0,1fr) 150px 110px auto"] { grid-template-columns: 1fr !important; }
+  /* Big footer / hero watermarks stay out of the way. */
+  img[data-spin][style*="520px"] { width: 300px !important; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  [style*="repeat(4,minmax(0,1fr))"], [style*="repeat(3,minmax(0,1fr))"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  [style*="minmax(0,2fr) minmax(0,1.4fr) repeat(3, 90px) auto"] { grid-template-columns: 1fr 1fr !important; }
+}

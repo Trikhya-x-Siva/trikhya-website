@@ -186,7 +186,9 @@ export function initMotion({ markWhite, markBlue }: Opts) {
         const f = parseFloat(el.dataset.parallax) || 0.15;
         el.style.translate = `0 ${(r.top + r.height / 2 - vh / 2) * -f}px`;
       } else if (el.hasAttribute("data-fill")) {
-        const p = clamp((vh * 0.85 - r.top) / (vh * 0.5));
+        // Phones: paragraphs are taller than the window, so fill faster or the tail never lights up.
+        const narrow = innerWidth < 760;
+        const p = clamp((vh * (narrow ? 0.95 : 0.85) - r.top) / (vh * (narrow ? 0.3 : 0.5)));
         const ws = el.querySelectorAll<HTMLElement>("[data-fw]");
         ws.forEach((w, i) => (w.style.opacity = (i + 1) / ws.length <= p + 0.02 ? "1" : "0.18"));
       } else if (el.hasAttribute("data-htrack")) {
