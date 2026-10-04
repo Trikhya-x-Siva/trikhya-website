@@ -107,7 +107,7 @@ export function NlqSolutionPage() {
             <p style={{ margin: 0, fontSize: 19, lineHeight: 1.55, color: "#aab3bf", maxWidth: 720 }}>{NLQ.pipeline.body}</p>
           </div>
           <div data-reveal="1" data-wipe="1"><PipelineDiagram /></div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 1, background: "#2a313c", border: "1px solid #2a313c" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 1, background: "#2a313c", border: "1px solid #2a313c" }}>
             {NLQ.pipeline.steps.map((s, i) => (
               <div key={i} data-reveal="1" data-spot="1" data-hover="background:#161a21;" style={{ background: "#0E1116", padding: "28px 26px", display: "flex", flexDirection: "column", gap: 10, transition: "background .25s" }}>
                 <span style={{ fontFamily: MONO, fontSize: 13, color: "#4FB8EE", letterSpacing: ".12em" }}>0{i + 1}</span>
@@ -160,7 +160,7 @@ export function NlqSolutionPage() {
             <span style={eyebrow("#4FB8EE")}>AROUND THE ASSISTANT</span>
             <h2 style={H2}>What else we built for the same floor.</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 1, background: "#2a313c", border: "1px solid #2a313c" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 1, background: "#2a313c", border: "1px solid #2a313c" }}>
             {NLQ.around.map((a, i) => (
               <div key={i} data-reveal="1" data-spot="1" data-hover="background:#161a21;" style={{ background: "#0E1116", padding: "36px 32px", display: "flex", flexDirection: "column", gap: 14, minHeight: 220, transition: "background .25s" }}>
                 <span style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-.01em", lineHeight: 1.2 }}>{a.title}</span>

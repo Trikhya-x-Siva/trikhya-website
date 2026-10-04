@@ -15,16 +15,20 @@ export const GREY = "#6f7986", SKY = "#4FB8EE", ICE = "#BFE6FA";
 export function DiagramHost({ width, height, children }: { width: number; height: number; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [offset, setOffset] = useState(0);
   useEffect(() => {
     const el = ref.current; if (!el) return;
-    const update = () => setScale(Math.min(1, el.clientWidth / width));
+    const update = () => {
+      const s = Math.min(1, el.clientWidth / width);
+      setScale(s); setOffset(Math.max(0, (el.clientWidth - width * s) / 2));
+    };
     update(); const ro = new ResizeObserver(update); ro.observe(el);
     return () => ro.disconnect();
   }, [width]);
   return (
     <div ref={ref} style={{ width: "100%", overflow: "hidden", border: "1px solid #2a313c", background: "#161a21" }}>
       <div style={{ height: height * scale }}>
-        <div style={{ position: "relative", width, height, transform: `scale(${scale})`, transformOrigin: "top left" }}>{children}</div>
+        <div style={{ position: "relative", width, height, marginLeft: offset, transform: `scale(${scale})`, transformOrigin: "top left" }}>{children}</div>
       </div>
     </div>
   );

@@ -5,6 +5,8 @@ import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { FeaturedSolution } from "@/components/solutions/FeaturedSolution";
 import { withBase } from "@/lib/paths";
+import { INSIGHTS } from "@/content/insights";
+import { InsightCard } from "@/components/insights/InsightCard";
 const services = [
   { n: "01", title: "AI strategy & discovery", body: "We find the decisions where AI pays back first, and define how success will be measured." },
   { n: "02", title: "Data & systems integration", body: "Connecting the tools, databases and documents you already use into a layer AI can reason over safely." },
@@ -16,15 +18,6 @@ const offerings = [
   { n: "02", title: "Specialized AI Workflows", body: "End-to-end automation pipelines custom-built for complex, multi-step operations in your specific stack." },
   { n: "03", title: "Domain Adapted Intelligence", body: "Fine-tuned models that understand the nuance, jargon, and specific constraints of your industry." },
 ];
-const allPosts = [
-  { tag: "ESSAY · 6 MIN", title: "Why human-AI-human beats fully autonomous AI in operations" },
-  { tag: "ENGINEERING · 9 MIN", title: "Getting correct answers from messy business data" },
-  { tag: "FIELD NOTES · 4 MIN", title: "What we learned taking AI from pilot to daily use" },
-  { tag: "GUIDE · 7 MIN", title: "Choosing the first AI use case worth funding" },
-  { tag: "ENGINEERING · 8 MIN", title: "Evaluating AI systems before they reach users" },
-  { tag: "ESSAY · 5 MIN", title: "B-AI-C: putting AI in front of customers without losing trust" },
-];
-const posts = allPosts.slice(0, 3);
 
 export function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -164,13 +157,7 @@ export function HomePage() {
 <a href={withBase("/insights/")} style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All insights →</a>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: "28px" }}>
-{posts.map((p, i) => (<Fragment key={i}>
-<a href={withBase("/insights/")} data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116" }} data-hover="color:#1670A6;">
-<div data-wipe="1" style={{ aspectRatio: "16/10", background: "repeating-linear-gradient(135deg,#e3e7ec 0 10px,#edf0f3 10px 20px)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#5b6370", background: "#F4F6F8", padding: "5px 9px" }}>cover image</span></div>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#5b6370" }}>{p.tag}</span>
-<span style={{ fontSize: "23px", fontWeight: "700", lineHeight: "1.25", letterSpacing: "-.01em" }}>{p.title}</span>
-</a>
-</Fragment>))}
+{INSIGHTS.slice(0, 3).map((i, k) => <InsightCard key={i.slug} i={i} index={k} />)}
 </div>
 </section>
 

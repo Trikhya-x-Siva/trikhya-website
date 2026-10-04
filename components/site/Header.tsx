@@ -63,7 +63,7 @@ export function Header() {
               </a>
             ))}
           </nav>
-          <a href={withBase("/contact/")} data-magnet="1" data-hide-sm="1" data-hover="background:#BFE6FA;color:#0F4A70;" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: 700, fontSize: 15, padding: "11px 22px", borderRadius: 999, whiteSpace: "nowrap" }}>Contact us</a>
+          <a href={withBase("/contact/")} data-hide-sm="1" data-hover="background:#BFE6FA;color:#0F4A70;" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: 700, fontSize: 15, padding: "11px 22px", borderRadius: 999, whiteSpace: "nowrap" }}>Contact us</a>
           <button type="button" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" style={{ display: wide ? "none" : "flex", width: 44, height: 44, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,.6)", background: "transparent", color: "#ffffff", fontSize: 18, cursor: "pointer", alignItems: "center", justifyContent: "center" }}>{open ? "✕" : "≡"}</button>
         </div>
       </div>

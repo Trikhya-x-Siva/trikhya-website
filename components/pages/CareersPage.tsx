@@ -1,15 +1,10 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { CareersBoard } from "@/components/careers/CareersBoard";
 import { withBase } from "@/lib/paths";
-const roles = [
-  { title: "AI Engineer", team: "Engineering", where: "Location · placeholder" },
-  { title: "Forward-Deployed Engineer", team: "Delivery", where: "Location · placeholder" },
-  { title: "Data Engineer", team: "Engineering", where: "Location · placeholder" },
-  { title: "Product Designer", team: "Product", where: "Location · placeholder" },
-];
 
 export function CareersPage() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -43,16 +38,7 @@ export function CareersPage() {
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>OPEN ROLES</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Current openings.</h2>
 </div>
-<div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid #2a313c" }}>
-{roles.map((r, i) => (<Fragment key={i}>
-<a href="mailto:careers@trikhya.ai?subject=Application%20at%20Trikhya" data-reveal="1" data-spot="1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "16px", alignItems: "center", padding: "28px 0", borderBottom: "1px solid #2a313c", color: "#ffffff", transition: "padding .25s" }} data-hover="color:#4FB8EE;padding-left:12px;">
-<span style={{ fontSize: "26px", fontWeight: "700", letterSpacing: "-.01em" }}>{r.title}</span>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".1em", color: "#8a94a1" }}>{r.team}</span>
-<span style={{ fontSize: "16px", color: "#aab3bf" }}>{r.where}</span>
-<span style={{ fontWeight: "700", fontSize: "16px", justifySelf: "start" }}>Apply →</span>
-</a>
-</Fragment>))}
-</div>
+<CareersBoard />
 </div>
 </section>
     </div>

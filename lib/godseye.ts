@@ -35,16 +35,16 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
   <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid ${LINE};background:#1670A6;">
     <div style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;"><img src="${markWhite}" alt="" style="width:22px;"></div>
     <div style="display:flex;flex-direction:column;flex:1;line-height:1.2;"><span style="font-weight:800;font-size:17px;">Godseye</span><span style="font-family:${M};font-size:11px;letter-spacing:.08em;color:#d9eefb;">● TRIKHYA ASSISTANT</span></div>
-    <button data-g-close aria-label="Close chat" style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:16px;cursor:pointer;">✕</button>
+    <button data-g-close aria-label="Close chat" style="width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:16px;">✕</button>
   </div>
   <div data-g-log style="flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;"></div>
   <div data-g-sugg style="display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 12px;"></div>
   <form data-g-form style="display:flex;gap:8px;padding:12px;border-top:1px solid ${LINE};">
     <input data-g-in placeholder="Ask Godseye…" aria-label="Message" style="flex:1;min-width:0;background:${INK};border:1px solid ${LINE};border-radius:999px;color:#fff;font:400 15px ${F};padding:12px 16px;outline:none;">
-    <button type="submit" aria-label="Send" style="width:44px;height:44px;flex:none;border-radius:50%;border:none;background:${L};color:${INK};font-weight:800;font-size:18px;cursor:pointer;">↑</button>
+    <button type="submit" aria-label="Send" style="width:44px;height:44px;flex:none;border-radius:50%;border:none;background:${L};color:${INK};font-weight:800;font-size:18px;">↑</button>
   </form>
 </div>
-<button data-g-btn aria-label="Chat with Godseye" style="display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 8px;border-radius:999px;border:none;background:${L};color:${INK};font:800 16px ${F};cursor:pointer;box-shadow:0 14px 40px rgba(0,0,0,.35);">
+<button data-g-btn aria-label="Chat with Godseye" style="display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 8px;border-radius:999px;border:none;background:${L};color:${INK};font:800 16px ${F};box-shadow:0 14px 40px rgba(0,0,0,.35);">
   <span style="width:40px;height:40px;border-radius:50%;background:${INK};display:flex;align-items:center;justify-content:center;"><img src="${markBlue}" alt="" style="width:22px;height:22px;object-fit:contain;transform-origin:49.5% 61.6%;"></span>
   <span data-g-lbl>Ask Godseye</span>
 </button>`;
@@ -82,7 +82,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     };
     SUGG.forEach((s) => {
       const c = document.createElement("button"); c.type = "button"; c.textContent = s;
-      css(c, { background: "transparent", border: `1px solid ${LINE}`, color: "#d4dae2", borderRadius: "999px", padding: "8px 12px", font: `500 13px ${F}`, cursor: "pointer" });
+      css(c, { background: "transparent", border: `1px solid ${LINE}`, color: "#d4dae2", borderRadius: "999px", padding: "8px 12px", font: `500 13px ${F}` });
       c.onmouseenter = () => css(c, { borderColor: L, color: L }); c.onmouseleave = () => css(c, { borderColor: LINE, color: "#d4dae2" }); c.onclick = () => ask(s);
       sugg.appendChild(c);
     });

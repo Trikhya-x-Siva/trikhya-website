@@ -1,17 +1,11 @@
 "use client";
 
-import { Fragment, useRef } from "react";
+import { useRef } from "react";
+import { INSIGHTS } from "@/content/insights";
+import { InsightCard } from "@/components/insights/InsightCard";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
-const allPosts = [
-  { tag: "ESSAY · 6 MIN", title: "Why human-AI-human beats fully autonomous AI in operations" },
-  { tag: "ENGINEERING · 9 MIN", title: "Getting correct answers from messy business data" },
-  { tag: "FIELD NOTES · 4 MIN", title: "What we learned taking AI from pilot to daily use" },
-  { tag: "GUIDE · 7 MIN", title: "Choosing the first AI use case worth funding" },
-  { tag: "ENGINEERING · 8 MIN", title: "Evaluating AI systems before they reach users" },
-  { tag: "ESSAY · 5 MIN", title: "B-AI-C: putting AI in front of customers without losing trust" },
-];
 
 export function InsightsPage() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -36,13 +30,7 @@ export function InsightsPage() {
 <a href="#insights" style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px" }}>All insights →</a>
 </div>
 <div data-htrack="1" style={{ position: "relative" }}><div style={{ position: "sticky", top: "140px", overflow: "hidden" }}><div data-htrack-row="1" style={{ display: "flex", gap: "28px", width: "max-content" }}>
-{allPosts.map((p, i) => (<Fragment key={i}>
-<a href={withBase("/insights/")} data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#0E1116", width: "min(440px,78vw)", flex: "none" }} data-hover="color:#1670A6;">
-<div data-wipe="1" style={{ aspectRatio: "16/10", background: "repeating-linear-gradient(135deg,#e3e7ec 0 10px,#edf0f3 10px 20px)", display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#5b6370", background: "#F4F6F8", padding: "5px 9px" }}>cover image</span></div>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#5b6370" }}>{p.tag}</span>
-<span style={{ fontSize: "23px", fontWeight: "700", lineHeight: "1.25", letterSpacing: "-.01em" }}>{p.title}</span>
-</a>
-</Fragment>))}
+{INSIGHTS.map((i, k) => <InsightCard key={i.slug} i={i} index={k} width="min(440px,78vw)" />)}
 </div></div></div>
 </section>
 
