@@ -10,7 +10,7 @@ import { QueryDemo } from "@/components/solutions/FeaturedSolution";
 import { PipelineDiagram } from "@/components/solutions/PipelineDiagram";
 
 const MONO = "'JetBrains Mono',monospace";
-const PAD = "clamp(56px,7vw,96px) clamp(20px,5vw,40px)";
+const PAD = "clamp(44px,5vw,72px) clamp(20px,5vw,40px)";
 const H2: React.CSSProperties = { margin: 0, fontSize: "clamp(38px,4.6vw,68px)", lineHeight: 1, fontWeight: 800, letterSpacing: "-.035em", textWrap: "balance" };
 const eyebrow = (color: string): React.CSSProperties => ({ fontFamily: MONO, fontSize: 13, letterSpacing: ".16em", color });
 
@@ -25,7 +25,7 @@ export function NlqSolutionPage() {
       {/* Hero */}
       <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: -81, paddingTop: 81 }}>
         <img data-spin="1" data-parallax="0.3" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-10%", top: "4%", width: "min(56vw,780px)", opacity: 0.12, pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(56px,6vw,88px)", display: "flex", flexDirection: "column", gap: 28 }}>
+        <div style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: "clamp(40px,5vw,72px) clamp(20px,5vw,40px) clamp(48px,5vw,72px)", display: "flex", flexDirection: "column", gap: 28 }}>
           <div data-word="1" style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".18em", display: "flex", gap: 12, alignItems: "center" }}><span style={{ width: 28, height: 1, background: "#fff" }} />SOLUTION {NLQ.tag} · {NLQ.status.toUpperCase()}</div>
           <h1 style={{ margin: 0, fontSize: "clamp(46px,6.6vw,100px)", lineHeight: 0.95, fontWeight: 800, letterSpacing: "-.045em", maxWidth: 1050 }}>{words("Natural Language")}{words("Query Assistant.", "#BFE6FA")}</h1>
           <p data-word="1" style={{ margin: 0, fontSize: "clamp(18px,1.7vw,23px)", lineHeight: 1.5, maxWidth: 680, textWrap: "pretty" }}>{NLQ.tagline}</p>
@@ -41,8 +41,8 @@ export function NlqSolutionPage() {
       </section>
 
       {/* The problem */}
-      <section style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 56 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 64, alignItems: "end" }}>
+      <section style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 36 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 48, alignItems: "end" }}>
           <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <span style={eyebrow("#1670A6")}>THE PROBLEM</span>
             <h2 style={H2}>{NLQ.problem.lead}</h2>
@@ -63,7 +63,7 @@ export function NlqSolutionPage() {
       {/* What we built */}
       <section style={{ background: "#0E1116", color: "#ffffff", position: "relative", overflow: "hidden" }}>
         <div data-blueprint="1" style={{ position: "absolute", inset: 0, pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 64 }}>
+        <div style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 40 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,460px),1fr))", gap: 56, alignItems: "center" }}>
             <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <span style={eyebrow("#4FB8EE")}>WHAT WE BUILT</span>
@@ -78,8 +78,8 @@ export function NlqSolutionPage() {
 
       {/* Approach */}
       <section style={{ background: "#E7ECF1" }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 56 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 64, alignItems: "end" }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 36 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 48, alignItems: "end" }}>
             <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <span style={eyebrow("#1670A6")}>OUR APPROACH</span>
               <h2 style={H2}>{NLQ.approach.lead}</h2>
@@ -100,7 +100,7 @@ export function NlqSolutionPage() {
 
       {/* Pipeline */}
       <section style={{ background: "#0E1116", color: "#ffffff" }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 48 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 32 }}>
           <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 860 }}>
             <span style={eyebrow("#4FB8EE")}>HOW IT WORKS</span>
             <h2 style={H2}>{NLQ.pipeline.lead}</h2>
@@ -121,7 +121,7 @@ export function NlqSolutionPage() {
 
       {/* Data */}
       <section style={{ background: "#161a21", color: "#ffffff", borderTop: "1px solid #222831" }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 48 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 32 }}>
           <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 860 }}>
             <span style={eyebrow("#4FB8EE")}>THE DATA</span>
             <h2 style={H2}>{NLQ.data.lead}</h2>
@@ -132,8 +132,8 @@ export function NlqSolutionPage() {
       </section>
 
       {/* Outcome */}
-      <section style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 56 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 64, alignItems: "center" }}>
+      <section style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 36 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: 48, alignItems: "center" }}>
           <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <span style={eyebrow("#1670A6")}>THE RESULT</span>
             <h2 style={H2}>{NLQ.outcome.lead}</h2>
@@ -155,7 +155,7 @@ export function NlqSolutionPage() {
 
       {/* Around it */}
       <section style={{ background: "#0E1116", color: "#ffffff" }}>
-        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 48 }}>
+        <div style={{ maxWidth: 1360, margin: "0 auto", padding: PAD, display: "flex", flexDirection: "column", gap: 32 }}>
           <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 860 }}>
             <span style={eyebrow("#4FB8EE")}>AROUND THE ASSISTANT</span>
             <h2 style={H2}>What else we built for the same floor.</h2>
@@ -178,7 +178,7 @@ export function NlqSolutionPage() {
       {/* CTA */}
       <section style={{ background: "#1670A6", color: "#ffffff", position: "relative", overflow: "hidden" }}>
         <img data-spin="1" src={MARK_WHITE} alt="" style={{ position: "absolute", right: -120, bottom: -200, width: 520, opacity: 0.12, pointerEvents: "none" }} />
-        <div data-reveal="1" style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: "clamp(56px,7vw,88px) clamp(20px,5vw,40px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 40 }}>
+        <div data-reveal="1" style={{ position: "relative", maxWidth: 1360, margin: "0 auto", padding: "clamp(48px,5vw,72px) clamp(20px,5vw,40px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 40 }}>
           <h2 style={{ ...H2, fontSize: "clamp(36px,4.6vw,64px)", maxWidth: 760 }}>Want this answering questions about your business?</h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
             <a href={withBase("/contact/")} data-magnet="1" data-hover="background:#BFE6FA;color:#0F4A70;" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: 700, fontSize: 17, padding: "18px 30px", borderRadius: 999 }}>Talk to us →</a>
