@@ -35,10 +35,7 @@ export function CookieBanner() {
   if (!shown) return null;
   return (
     <div role="dialog" aria-label="Cookie notice" aria-live="polite" style={{ position: "fixed", left: 24, bottom: 24, zIndex: 60, width: "min(440px, calc(100vw - 48px))", background: "#161a21", color: "#ffffff", border: "1px solid #2a313c", boxShadow: "0 30px 80px rgba(0,0,0,.5)", padding: "22px 24px", display: "flex", flexDirection: "column", gap: 16, fontFamily: "'Hanken Grotesk',sans-serif", opacity: open ? 1 : 0, transform: open ? "none" : "translateY(16px)", transition: `opacity .5s ${E}, transform .5s ${E}` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: ".16em", color: "#8a94a1" }}>COOKIES</span>
-        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#5fd39a" }}>● NO TRACKERS</span>
-      </div>
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: ".16em", color: "#8a94a1" }}>COOKIES</span>
       <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.5, color: "#d4dae2" }}>
         This site uses only the browser storage it needs to work: your choice here and a one-off flag for page transitions. No analytics, no advertising cookies.{" "}
         <a href={withBase("/privacy/#cookies")} style={{ color: "#4FB8EE", borderBottom: "1px solid #4FB8EE" }}>How we handle data</a>
