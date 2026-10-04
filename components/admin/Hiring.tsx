@@ -12,7 +12,7 @@ const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 const STATUS_COLOR: Record<string, string> = { draft: C.dim, open: C.green, closed: C.amber, archived: "#5b6370" };
 const APP_COLOR: Record<string, string> = { new: C.ice, screening: C.sky, screened: C.ink, shortlisted: C.green, rejected: C.amber, failed: "#ef6b6b" };
 
-type Counts = Record<string, { total: number; shortlisted: number; new_count: number }>;
+type Counts = Record<string, { total: number; shortlisted: number; new_count: number; failed: number }>;
 
 /** Hiring management: roles, their application forms and criteria, and every application with its screening. */
 export function Hiring({ onBack }: { onBack: () => void }) {
@@ -25,14 +25,21 @@ export function Hiring({ onBack }: { onBack: () => void }) {
   const load = () => {
     const sb = supabase()!;
     sb.from("jobs").select("*").order("posted", { ascending: false }).then(({ data, error }) => { if (error) setErr(error.message); else setJobs(data as JobRow[]); });
-    sb.rpc("application_counts").then(({ data }) => { const m: Counts = {}; (data ?? []).forEach((r: { job_id: string; total: number; shortlisted: number; new_count: number }) => { m[r.job_id] = r; }); setCounts(m); });
+    sb.from("applications").select("job_id, status").then(({ data }) => {
+      const m: Counts = {};
+      (data ?? []).forEach((r: { job_id: string; status: string }) => {
+        const c = m[r.job_id] ?? (m[r.job_id] = { total: 0, shortlisted: 0, new_count: 0, failed: 0 });
+        c.total++; if (r.status === "shortlisted") c.shortlisted++; if (r.status === "failed") c.failed++; if (!["shortlisted", "rejected"].includes(r.status)) c.new_count++;
+      });
+      setCounts(m);
+    });
   };
   useEffect(load, []);
 
   if (editing) return <RoleEditor job={editing === "new" ? null : editing} onDone={() => { setEditing(null); load(); }} />;
   if (viewing) return <Applications job={viewing} onBack={() => { setViewing(null); load(); }} />;
 
-  const totals = Object.values(counts).reduce((t, c) => ({ total: t.total + Number(c.total), shortlisted: t.shortlisted + Number(c.shortlisted), new_count: t.new_count + Number(c.new_count) }), { total: 0, shortlisted: 0, new_count: 0 });
+  const totals = Object.values(counts).reduce((t, c) => ({ total: t.total + c.total, shortlisted: t.shortlisted + c.shortlisted, new_count: t.new_count + c.new_count, failed: t.failed + c.failed }), { total: 0, shortlisted: 0, new_count: 0, failed: 0 });
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -45,27 +52,29 @@ export function Hiring({ onBack }: { onBack: () => void }) {
       <div style={grid(200)}>
         <Kpi label="Open roles" value={fmt((jobs ?? []).filter((j) => j.status === "open").length)} sub={`${(jobs ?? []).length} roles in total`} />
         <Kpi label="Applications" value={fmt(totals.total)} />
-        <Kpi label="Awaiting review" value={fmt(totals.new_count)} accent={totals.new_count ? C.sky : undefined} />
+        <Kpi label="Awaiting review" value={fmt(totals.new_count)} accent={totals.new_count ? C.sky : undefined} sub={totals.failed ? `${totals.failed} with a screening error` : "not yet shortlisted or rejected"} />
         <Kpi label="Shortlisted" value={fmt(totals.shortlisted)} accent={C.green} />
       </div>
       {err ? <Panel><Empty text={`Could not load roles: ${err}. Has migration 0003 been run?`} /></Panel> : null}
-      <Panel title="Roles" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>CLICK A ROLE FOR ITS APPLICATIONS</span>}>
+      <style>{`.adm-row-card:hover{background:rgba(255,255,255,.03)}`}</style>
+      <Panel title="Roles" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>OPEN A ROLE TO REVIEW ITS CANDIDATES</span>}>
         {!jobs ? <Empty text="Loading…" /> : !jobs.length ? <Empty text="No roles yet. Create the first one." /> : (
           <div style={{ display: "flex", flexDirection: "column" }}>
             {jobs.map((j) => {
               const c = counts[j.id];
               return (
-                <div key={j.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1.4fr) repeat(3, 90px) auto", alignItems: "center", gap: 16, padding: "14px 6px", borderBottom: `1px solid ${C.line}` }}>
-                  <button type="button" onClick={() => setViewing(j)} style={{ all: "unset", cursor: "pointer", display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
+                <div key={j.id} onClick={() => setViewing(j)} className="adm-row-card" style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(0,1.4fr) repeat(3, 90px) auto", alignItems: "center", gap: 16, padding: "14px 10px", borderBottom: `1px solid ${C.line}`, cursor: "pointer" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
                     <span style={{ fontSize: 17, fontWeight: 700 }}>{j.title}</span>
                     <span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{j.team.toUpperCase()} · {j.type.toUpperCase()} · POSTED {j.posted}</span>
-                  </button>
+                  </div>
                   <span style={{ fontSize: 14, color: C.mid, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{j.location} · {j.experience}</span>
                   <Stat n={c?.total ?? 0} label="applied" />
-                  <Stat n={c?.new_count ?? 0} label="to review" color={c?.new_count ? C.sky : undefined} />
+                  <Stat n={c?.new_count ?? 0} label={c?.failed ? "to review · !" : "to review"} color={c?.new_count ? (c?.failed ? C.amber : C.sky) : undefined} />
                   <Stat n={c?.shortlisted ?? 0} label="shortlist" color={C.green} />
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }} onClick={(e) => e.stopPropagation()}>
                     <span style={{ fontFamily: MONO, fontSize: 11, color: STATUS_COLOR[j.status], border: `1px solid ${STATUS_COLOR[j.status]}`, padding: "4px 10px", borderRadius: 999 }}>{j.status.toUpperCase()}</span>
+                    <Pill on onClick={() => setViewing(j)}>Candidates{c?.total ? ` · ${c.total}` : ""}</Pill>
                     <Pill onClick={() => setEditing(j)}>Edit</Pill>
                   </div>
                 </div>
@@ -267,14 +276,15 @@ function Applications({ job, onBack }: { job: JobRow; onBack: () => void }) {
           {(["all", "new", "screened", "shortlisted", "rejected", "failed"] as const).map((s) => <Pill key={s} on={filter === s} onClick={() => setFilter(s)}>{s === "all" ? "All" : `${s[0].toUpperCase()}${s.slice(1)} · ${count(s)}`}</Pill>)}
         </div>
       </div>
-      <Panel title="Candidates" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>SCORES APPEAR WITHIN A MINUTE OF APPLYING</span>}>
+      {count("failed") ? <Panel><span style={{ fontSize: 14, lineHeight: 1.5, color: C.amber }}>{count("failed")} application{count("failed") > 1 ? "s" : ""} could not be screened. Open the candidate to see the reason and press “Re-run screener”. The usual cause is the model key on the server.</span></Panel> : null}
+      <Panel title="Candidates" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>CLICK A CANDIDATE TO REVIEW · SCORES APPEAR WITHIN A MINUTE OF APPLYING</span>}>
         {!rows ? <Empty text="Loading…" /> : !visible.length ? <Empty text="No applications here yet." /> : (
           <Table head={["Candidate", "Applied", "Score", "Hard filter", "Status"]} rows={visible.map((r) => [
             `${r.candidate_name}  ·  ${r.email}`,
             new Date(r.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }),
-            r.score == null ? (r.status === "failed" ? "error" : "…") : String(Math.round(Number(r.score))),
+            r.score == null ? (r.status === "failed" ? "error" : "pending") : String(Math.round(Number(r.score))),
             r.must_have_pass == null ? "—" : r.must_have_pass ? "pass" : "fail",
-            r.status,
+            r.status === "new" ? "awaiting screen" : r.status === "failed" ? "screen failed" : r.status,
           ])} onRow={(i) => setPick(visible[i])} />
         )}
       </Panel>
