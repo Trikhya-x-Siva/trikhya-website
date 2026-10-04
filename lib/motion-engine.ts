@@ -10,13 +10,12 @@ declare global {
   interface Window { __trikhyaMotion?: boolean; __trikhyaReduce?: boolean }
 }
 
-/** The design's reduced-motion rule: the OS preference, unless the visitor
- *  opted into full motion with localStorage "trikhya-motion" = "full". */
+/** Motion policy: always play the full choreography. The OS "reduce motion"
+ *  preference is intentionally ignored (client decision, 2026-10-04). Setting
+ *  localStorage "trikhya-motion" = "reduce" restores the calm fallback for testing. */
 export function reducedMotion(): boolean {
   if (typeof window === "undefined") return false;
-  let forceFull = false;
-  try { forceFull = localStorage.getItem("trikhya-motion") === "full"; } catch { /* private mode */ }
-  return !forceFull && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try { return localStorage.getItem("trikhya-motion") === "reduce"; } catch { return false; }
 }
 
 export function initMotion({ markWhite, markBlue }: Opts) {

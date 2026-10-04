@@ -11,7 +11,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
   if (typeof window === "undefined" || window.__godseye) return;
   window.__godseye = true;
   const L = "#4FB8EE", INK = "#0E1116", PANEL = "#161a21", LINE = "#2a313c", F = "'Hanken Grotesk',sans-serif", M = "'JetBrains Mono',monospace";
-  const reduce = window.__trikhyaReduce ?? matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduce = window.__trikhyaReduce ?? false;
   const KB: [RegExp, string][] = [
     [/service|offer|do you do|help/i, "We take AI from first idea to everyday use: strategy and discovery, data and systems integration, custom assistants and agents, and deployment with ongoing support."],
     [/solution|built|example|case/i, "We've built ask-your-business analytics, document and knowledge assistants, multi-step workflow agents and customer-facing assistants. Client names stay private."],
