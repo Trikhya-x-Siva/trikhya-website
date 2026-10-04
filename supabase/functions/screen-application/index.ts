@@ -24,7 +24,7 @@ The application form answers are also given; use them to fill gaps but prefer th
 type Block = { type: "text"; text: string } | { type: "document"; source: { type: "base64"; media_type: "application/pdf"; data: string } };
 
 async function claude(system: string, content: Block[] | string, maxTokens: number): Promise<string> {
-  const key = Deno.env.get("ANTHROPIC_API_KEY"); if (!key) throw new Error("ANTHROPIC_API_KEY is not set on the server");
+  const key = Deno.env.get("ANTHROPIC_API_KEY")?.trim(); if (!key) throw new Error("ANTHROPIC_API_KEY is not set on the server");
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST", headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, temperature: 0, system, messages: [{ role: "user", content }] }),

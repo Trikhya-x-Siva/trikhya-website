@@ -35,14 +35,14 @@ Deno.serve(async (req) => {
 
     for (const a of apps ?? []) {
       if (a.status !== "shortlisted") { results.push({ application_id: a.id, status: "skipped", error: "only shortlisted candidates are called" }); continue; }
-      const phone = a.phone || (a.parsed as { phone?: string } | null)?.phone;
-      if (!phone) { results.push({ application_id: a.id, status: "skipped", error: "no phone number on file" }); continue; }
+      const phone = [a.phone, (a.parsed as { phone?: string } | null)?.phone].find((p) => p && String(p).replace(/\D/g, "").length >= 10);
+      if (!phone) { results.push({ application_id: a.id, status: "skipped", error: "no valid phone number on file" }); continue; }
       // One live interview at a time per candidate.
       const { data: open } = await sb.from("interviews").select("id").eq("application_id", a.id).in("status", ["queued", "initiating", "ringing", "in_progress"]).limit(1);
       if (open?.length) { results.push({ application_id: a.id, interview_id: open[0].id, status: "already_running" }); continue; }
 
-      const { data: iv } = await sb.from("interviews").insert({ application_id: a.id, job_id: a.job_id, status: "queued" }).select().single();
-      if (!iv) { results.push({ application_id: a.id, status: "failed", error: "could not create interview" }); continue; }
+      const { data: iv, error: ivErr } = await sb.from("interviews").insert({ application_id: a.id, job_id: a.job_id, status: "queued" }).select().single();
+      if (!iv) { results.push({ application_id: a.id, status: "failed", error: `could not create interview (${ivErr?.message ?? "unknown"}; has migration 0004 been run?)` }); continue; }
 
       if (!BRIDGE_URL || !BRIDGE_SECRET) {
         await sb.from("interviews").update({ error: "Calling is not connected yet: the interview bridge and a phone number need to be set up." }).eq("id", iv.id);

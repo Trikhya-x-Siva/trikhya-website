@@ -279,7 +279,9 @@ function Applications({ job, onBack }: { job: JobRow; onBack: () => void }) {
     try {
       const res = await startInterviews(ids);
       const started = res.results.filter((r) => ["initiating", "queued"].includes(r.status)).length;
-      setCallMsg(res.configured ? `${started} call${started === 1 ? "" : "s"} started.` : `${started} candidate${started === 1 ? "" : "s"} queued. Calling is not connected yet: the phone line and interview bridge still need to be set up, after which queued interviews can be started.`);
+      const problems = res.results.filter((r) => r.error).map((r) => { const a = (rows ?? []).find((x) => x.id === r.application_id); return `${a?.candidate_name ?? r.application_id.slice(0, 8)}: ${r.error}`; });
+      const head = res.configured ? `${started} call${started === 1 ? "" : "s"} started.` : `${started} candidate${started === 1 ? "" : "s"} queued. Calling is not connected yet: the phone line and interview bridge still need to be set up, after which queued interviews can be started.`;
+      setCallMsg(problems.length ? `${head} Not started: ${problems.join(" · ")}` : head);
     } catch (e) { setCallMsg((e as Error).message); }
     setCalling(false);
   };
