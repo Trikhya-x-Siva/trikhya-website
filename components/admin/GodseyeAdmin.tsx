@@ -17,13 +17,13 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
   const [convs, setConvs] = useState<Conv[] | null>(null);
-  const [tab, setTab] = useState<"Conversations" | "Knowledge" | "Behaviour">("Conversations");
+  const [tab, setTab] = useState<"Conversations" | "Knowledge" | "Documents" | "Behaviour">("Conversations");
   const [flagging, setFlagging] = useState<Conv | null>(null);
   const [note, setNote] = useState("");
 
   const load = () => {
     const sb = supabase()!;
-    sb.from("godseye_settings").select("*").eq("id", 1).single().then(({ data, error }) => { if (error) setMsg(error.message); else { setS(data as Settings); setDirty(false); } });
+    sb.from("godseye_settings").select("*").eq("id", 1).single().then(({ data, error }) => { if (error) setMsg(error.message); else { const row = data as Settings; if (row.model === "sarvam-m") { row.model = "sarvam-105b"; setDirty(true); } else setDirty(false); setS(row); } });
     sb.from("godseye_conversations").select("*").order("ts", { ascending: false }).limit(500).then(({ data }) => setConvs((data ?? []) as Conv[]));
   };
   useEffect(load, []);
@@ -66,7 +66,7 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
         <Kpi label="Avg response" value={`${(avgMs / 1000).toFixed(1)}s`} />
       </div>
       <nav style={{ display: "flex", gap: 24, borderBottom: `1px solid ${C.line}` }}>
-        {(["Conversations", "Knowledge", "Behaviour"] as const).map((t) => <button key={t} className="adm-tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
+        {(["Conversations", "Knowledge", "Documents", "Behaviour"] as const).map((t) => <button key={t} className="adm-tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
       </nav>
 
       {tab === "Conversations" ? (
@@ -95,6 +95,8 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
           <textarea rows={26} value={s.knowledge} onChange={(e) => set("knowledge", e.target.value)} className="adm-in" style={{ ...input, resize: "vertical", lineHeight: 1.55, fontFamily: MONO, fontSize: 13 }} />
         </Panel>
       ) : null}
+
+      {tab === "Documents" ? <Documents /> : null}
 
       {tab === "Behaviour" && s ? (
         <div style={grid(420)}>
@@ -139,5 +141,70 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
         </div>
       ) : null}
     </>
+  );
+}
+
+type Doc = { id: string; title: string; kind: "pdf" | "text" | "markdown"; storage_path: string | null; chars: number; enabled: boolean; status: "pending" | "ready" | "failed"; error: string | null; created_at: string };
+
+/** Knowledge documents: PDFs, text or markdown that Godseye may quote facts from. */
+function Documents() {
+  const [docs, setDocs] = useState<Doc[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const load = () => { supabase()!.from("godseye_documents").select("*").order("created_at", { ascending: false }).then(({ data, error }) => { if (error) setMsg(error.message); else setDocs((data ?? []) as Doc[]); }); };
+  useEffect(load, []);
+  const upload = async (file: File) => {
+    setBusy(true); setMsg("");
+    const sb = supabase()!;
+    const kind: Doc["kind"] = file.type === "application/pdf" || /\.pdf$/i.test(file.name) ? "pdf" : /\.md$/i.test(file.name) ? "markdown" : "text";
+    if (file.size > 15 * 1024 * 1024) { setMsg("Files must be 15 MB or smaller."); setBusy(false); return; }
+    const id = crypto.randomUUID(); const path = `docs/${id}.${kind === "pdf" ? "pdf" : kind === "markdown" ? "md" : "txt"}`;
+    const { error: up } = await sb.storage.from("godseye-docs").upload(path, file, { contentType: kind === "pdf" ? "application/pdf" : kind === "markdown" ? "text/markdown" : "text/plain" });
+    if (up) { setMsg(`Upload failed: ${up.message}`); setBusy(false); return; }
+    const { error: ins } = await sb.from("godseye_documents").insert({ id, title: file.name.replace(/\.[^.]+$/, ""), kind, storage_path: path });
+    if (ins) { setMsg(ins.message); setBusy(false); return; }
+    const { data, error } = await sb.functions.invoke("ingest-document", { body: { document_id: id } });
+    setMsg(error || data?.error ? `Saved, but reading it failed: ${error?.message ?? data?.error}` : `Added “${file.name}” · ${data?.chars?.toLocaleString?.() ?? ""} characters of text.`);
+    setBusy(false); load();
+  };
+  const toggle = async (d: Doc) => { await supabase()!.from("godseye_documents").update({ enabled: !d.enabled }).eq("id", d.id); load(); };
+  const remove = async (d: Doc) => {
+    if (!confirm(`Remove “${d.title}” from Godseye's knowledge?`)) return;
+    const sb = supabase()!; if (d.storage_path) await sb.storage.from("godseye-docs").remove([d.storage_path]);
+    await sb.from("godseye_documents").delete().eq("id", d.id); load();
+  };
+  const retry = async (d: Doc) => { setBusy(true); const { data, error } = await supabase()!.functions.invoke("ingest-document", { body: { document_id: d.id } }); setMsg(error || data?.error ? `Reading failed: ${error?.message ?? data?.error}` : "Read successfully."); setBusy(false); load(); };
+  const total = (docs ?? []).filter((d) => d.enabled && d.status === "ready").reduce((t, d) => t + d.chars, 0);
+  return (
+    <div style={grid(420)}>
+      <Panel title="Add a document">
+        <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>Upload a PDF, text or markdown file: a company deck, a service description, a case write-up without client names. The text is extracted once and given to Godseye as facts alongside the knowledge page. Up to about 40,000 characters are used per answer, newest documents first.</span>
+        <label style={{ ...input, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, cursor: busy ? "wait" : "pointer", borderStyle: "dashed" }}>
+          <span style={{ color: C.dim }}>{busy ? "Working…" : "Choose a PDF, .txt or .md file…"}</span>
+          <span style={{ fontFamily: MONO, fontSize: 12, color: C.sky }}>BROWSE</span>
+          <input type="file" accept="application/pdf,.pdf,.txt,.md,text/plain,text/markdown" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }} style={{ display: "none" }} />
+        </label>
+        {msg ? <span style={{ fontSize: 13, lineHeight: 1.5, color: msg.startsWith("Added") || msg.startsWith("Read") ? C.green : C.amber }}>{msg}</span> : null}
+      </Panel>
+      <Panel title="Documents" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{total.toLocaleString()} CHARACTERS IN USE</span>}>
+        {!docs ? <Empty text="Loading…" /> : !docs.length ? <Empty text="No documents yet." /> : (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {docs.map((d) => (
+              <div key={d.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, padding: "12px 4px", borderBottom: `1px solid ${C.line}`, opacity: d.enabled ? 1 : .55 }}>
+                <span style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                  <span style={{ fontSize: 15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.title}</span>
+                  <span style={{ fontFamily: MONO, fontSize: 11, color: d.status === "failed" ? C.amber : C.dim }}>{d.kind.toUpperCase()} · {d.status === "ready" ? `${d.chars.toLocaleString()} CHARS` : d.status.toUpperCase()}{d.error ? ` · ${d.error}` : ""} · {new Date(d.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }).toUpperCase()}</span>
+                </span>
+                <span style={{ display: "flex", gap: 6, flex: "none" }}>
+                  {d.status !== "ready" ? <Pill onClick={() => retry(d)}>Retry</Pill> : null}
+                  <Pill on={d.enabled} onClick={() => toggle(d)}>{d.enabled ? "In use" : "Off"}</Pill>
+                  <Pill onClick={() => remove(d)}>Remove</Pill>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Panel>
+    </div>
   );
 }

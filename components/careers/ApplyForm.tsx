@@ -18,6 +18,7 @@ export function ApplyForm({ job, onDone, onBack }: { job: JobRow; onDone: (id: s
   const [answers, setAnswers] = useState<Answers>({});
   const [resume, setResume] = useState<File | null>(null);
   const [consent, setConsent] = useState(false);
+  const [hp, setHp] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -26,6 +27,7 @@ export function ApplyForm({ job, onDone, onBack }: { job: JobRow; onDone: (id: s
 
   const submit = async (e: FormEvent) => {
     e.preventDefault(); setErr("");
+    if (hp) { onDone("00000000"); return; } // bot filled the hidden field: pretend success, store nothing
     if (form.resume !== "off" && !resume) { setErr("Please attach your resume as a PDF."); return; }
     for (const q of job.questions ?? []) if (q.required && !String(answers[`q_${q.id}`] ?? "").trim()) { setErr(`Please answer: ${q.label}`); return; }
     if (!consent) { setErr("Please confirm you agree to our privacy policy."); return; }
@@ -60,6 +62,7 @@ export function ApplyForm({ job, onDone, onBack }: { job: JobRow; onDone: (id: s
 
   return (
     <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 28 }}>
+      <input type="text" name="website" value={hp} onChange={(e) => setHp(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0 }} />
       <style>{`.apl-in:focus{border-color:#4FB8EE!important} .apl-in:-webkit-autofill{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0 1000px #0E1116 inset}`}</style>
       {groups.map((g) => (
         <section key={g} style={{ display: "flex", flexDirection: "column", gap: 14 }}>

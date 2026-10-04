@@ -37,6 +37,10 @@ export function parseJson<T>(raw: string): T {
   throw new Error("Model did not return JSON");
 }
 
+/** Browser callers must come from one of our origins. Server-to-server callers (no Origin) are allowed. */
+const ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "https://trikhya-x-siva.github.io,https://trikhya.ai,https://www.trikhya.ai,http://localhost:3000").split(",").map((s) => s.trim());
+export function allowedOrigin(req: Request) { const o = req.headers.get("Origin"); return !o || ORIGINS.includes(o); }
+
 export const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",

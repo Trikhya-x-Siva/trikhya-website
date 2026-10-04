@@ -10,6 +10,14 @@ const btn: React.CSSProperties = { font: "inherit", fontWeight: 700, fontSize: 1
 const grid = (min: number): React.CSSProperties => ({ display: "grid", gridTemplateColumns: `repeat(auto-fit,minmax(${min}px,1fr))`, gap: 20 });
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 const STATUS_COLOR: Record<string, string> = { draft: C.dim, open: C.green, closed: C.amber, archived: "#5b6370" };
+type Interview = { id: string; application_id: string; status: string; transcript: { role: string; text: string; ts?: string }[]; summary: string | null; score: number | null; duration_seconds: number | null; error: string | null; created_at: string; started_at: string | null; ended_at: string | null };
+const IV_COLOR: Record<string, string> = { queued: C.dim, initiating: C.sky, ringing: C.sky, in_progress: C.sky, completed: C.green, failed: "#ef6b6b", no_answer: C.amber };
+async function startInterviews(ids: string[]) {
+  const { data, error } = await supabase()!.functions.invoke("start-interview", { body: { application_ids: ids } });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return data as { configured: boolean; results: { application_id: string; status: string; error?: string }[] };
+}
 const APP_COLOR: Record<string, string> = { new: C.ice, screening: C.sky, screened: C.ink, shortlisted: C.green, rejected: C.amber, failed: "#ef6b6b" };
 
 type Counts = Record<string, { total: number; shortlisted: number; new_count: number; failed: number }>;
@@ -262,6 +270,19 @@ function Applications({ job, onBack }: { job: JobRow; onBack: () => void }) {
 
   const visible = (rows ?? []).filter((r) => filter === "all" || r.status === filter);
   const count = (s: ApplicationRow["status"]) => (rows ?? []).filter((r) => r.status === s).length;
+  const [callMsg, setCallMsg] = useState("");
+  const [calling, setCalling] = useState(false);
+  const callAll = async () => {
+    const ids = (rows ?? []).filter((r) => r.status === "shortlisted").map((r) => r.id);
+    if (!ids.length || !confirm(`Start AI phone screening for ${ids.length} shortlisted candidate${ids.length > 1 ? "s" : ""}?`)) return;
+    setCalling(true); setCallMsg("");
+    try {
+      const res = await startInterviews(ids);
+      const started = res.results.filter((r) => ["initiating", "queued"].includes(r.status)).length;
+      setCallMsg(res.configured ? `${started} call${started === 1 ? "" : "s"} started.` : `${started} candidate${started === 1 ? "" : "s"} queued. Calling is not connected yet: the phone line and interview bridge still need to be set up, after which queued interviews can be started.`);
+    } catch (e) { setCallMsg((e as Error).message); }
+    setCalling(false);
+  };
 
   if (pick) return <ApplicationDetail app={pick} job={job} onBack={() => { setPick(null); load(); }} />;
   return (
@@ -272,10 +293,12 @@ function Applications({ job, onBack }: { job: JobRow; onBack: () => void }) {
           <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>{job.title}</span>
           <span style={{ fontFamily: MONO, fontSize: 12, color: C.dim }}>{(rows ?? []).length} APPLICATIONS</span>
         </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+          <button type="button" disabled={calling || !count("shortlisted")} onClick={callAll} style={{ ...btn, opacity: count("shortlisted") ? 1 : .5, marginRight: 8 }}>{calling ? "Starting…" : `Call all shortlisted · ${count("shortlisted")}`}</button>
           {(["all", "new", "screened", "shortlisted", "rejected", "failed"] as const).map((s) => <Pill key={s} on={filter === s} onClick={() => setFilter(s)}>{s === "all" ? "All" : `${s[0].toUpperCase()}${s.slice(1)} · ${count(s)}`}</Pill>)}
         </div>
       </div>
+      {callMsg ? <Panel><span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>{callMsg}</span></Panel> : null}
       {count("failed") ? <Panel><span style={{ fontSize: 14, lineHeight: 1.5, color: C.amber }}>{count("failed")} application{count("failed") > 1 ? "s" : ""} could not be screened. Open the candidate to see the reason and press “Re-run screener”. The usual cause is the model key on the server.</span></Panel> : null}
       <Panel title="Candidates" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>CLICK A CANDIDATE TO REVIEW · SCORES APPEAR WITHIN A MINUTE OF APPLYING</span>}>
         {!rows ? <Empty text="Loading…" /> : !visible.length ? <Empty text="No applications here yet." /> : (
@@ -297,6 +320,17 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
   const [url, setUrl] = useState<string | null>(null);
   const [notes, setNotes] = useState(initial.notes ?? "");
   const [busy, setBusy] = useState(false);
+  const [iv, setIv] = useState<Interview | null>(null);
+  const [ivMsg, setIvMsg] = useState("");
+  const loadIv = () => { supabase()!.from("interviews").select("*").eq("application_id", app.id).order("created_at", { ascending: false }).limit(1).then(({ data }) => setIv((data?.[0] as Interview) ?? null)); };
+  useEffect(loadIv, [app.id]);
+  useEffect(() => { if (!iv || !["queued", "initiating", "ringing", "in_progress"].includes(iv.status)) return; const t = setInterval(loadIv, 8000); return () => clearInterval(t); }, [iv]);
+  const call = async () => {
+    setBusy(true); setIvMsg("");
+    try { const res = await startInterviews([app.id]); const r = res.results[0]; setIvMsg(r?.error ? r.error : res.configured ? "Calling the candidate now." : "Queued. Calling is not connected yet: the phone line and interview bridge still need to be set up."); }
+    catch (e) { setIvMsg((e as Error).message); }
+    setBusy(false); loadIv();
+  };
   useEffect(() => { if (app.resume_path) supabase()!.storage.from("resumes").createSignedUrl(app.resume_path, 3600).then(({ data }) => setUrl(data?.signedUrl ?? null)); }, [app.resume_path]);
 
   const update = async (patch: Partial<ApplicationRow>) => {
@@ -317,7 +351,7 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
       <span style={{ fontSize: 12, color: C.dim }}>{detail}</span>
     </div>
   );
-  const answers = Object.entries(app.answers ?? {}).filter(([k]) => !["name", "email"].includes(k));
+  const answers = Object.entries(app.answers ?? {}).filter(([k]) => !["name", "email", "phone"].includes(k) && !k.startsWith("_"));
   const labelFor = (k: string) => k.startsWith("q_") ? (job.questions ?? []).find((q) => `q_${q.id}` === k)?.label ?? k : FIELDS.find((f) => f.key === k)?.label ?? k;
 
   return (
@@ -331,6 +365,7 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" disabled={busy} onClick={() => update({ status: "shortlisted" })} style={{ ...btn, background: C.green }}>Shortlist</button>
           <button type="button" disabled={busy} onClick={() => update({ status: "rejected" })} style={{ ...btn, background: "transparent", color: C.ink, border: `1px solid ${C.line}` }}>Reject</button>
+          <button type="button" disabled={busy || app.status !== "shortlisted"} title={app.status !== "shortlisted" ? "Shortlist the candidate first" : undefined} onClick={call} style={{ ...btn, background: C.ice, opacity: app.status === "shortlisted" ? 1 : .5 }}>Start call screening</button>
           <Pill onClick={rescreen}>Re-run screener</Pill>
         </div>
       </div>
@@ -354,6 +389,16 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
               </div>
             ) : null}
             {app.rationale ? <div style={{ whiteSpace: "pre-wrap", fontSize: 15, lineHeight: 1.6, color: C.mid, borderTop: `1px solid ${C.line}`, paddingTop: 14 }}>{app.rationale.replace(/\*\*/g, "")}</div> : null}
+          </Panel>
+          <Panel title="Phone screening" right={iv ? <span style={{ fontFamily: MONO, fontSize: 11, color: IV_COLOR[iv.status] }}>{iv.status.replace("_", " ").toUpperCase()}</span> : null}>
+            {ivMsg ? <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>{ivMsg}</span> : null}
+            {!iv ? <Empty text={app.status === "shortlisted" ? "Not called yet. “Start call screening” rings the candidate and runs a first-round interview." : "Shortlist the candidate to enable phone screening."} /> : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, fontSize: 14, color: C.mid }}>
+                <span>{iv.status === "queued" ? (iv.error ?? "Waiting to be called.") : iv.status === "completed" ? `Completed · ${Math.round((iv.duration_seconds ?? 0) / 60)} min${iv.score != null ? ` · interview score ${Math.round(Number(iv.score))}` : ""}` : iv.error ?? `Started ${new Date(iv.created_at).toLocaleString("en-GB")}`}</span>
+                {iv.summary ? <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.55, color: C.ink }}>{iv.summary}</div> : null}
+                {iv.transcript?.length ? <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 320, overflowY: "auto", borderTop: `1px solid ${C.line}`, paddingTop: 10 }}>{iv.transcript.map((t, i) => <div key={i} style={{ display: "flex", gap: 10 }}><span style={{ fontFamily: MONO, fontSize: 11, color: t.role === "ai" ? C.sky : C.green, flex: "none", paddingTop: 3 }}>{t.role === "ai" ? "ASHA" : "CAND."}</span><span>{t.text}</span></div>)}</div> : null}
+              </div>
+            )}
           </Panel>
           <Panel title="Parsed profile">
             {!app.parsed ? <Empty text="Not parsed yet." /> : (
