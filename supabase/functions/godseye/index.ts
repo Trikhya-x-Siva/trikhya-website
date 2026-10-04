@@ -56,6 +56,7 @@ ${docsText}`;
     await sb.from("godseye_conversations").insert({ session_id, path, question: q, answer, in_scope, topic, latency_ms, model: `${s.provider}/${s.model}` });
     return json({ answer, in_scope, latency_ms });
   } catch (e) {
-    return json({ fallback: true, error: String((e as Error).message) }, 200);
+    console.error("godseye", (e as Error).message);
+    return json({ fallback: true }, 200);
   }
 });

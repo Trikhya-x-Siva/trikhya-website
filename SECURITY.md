@@ -24,9 +24,9 @@ depends on account settings outside this repository.
 |---|---|---|
 | `events` | insert only, well-formed rows, max 240 per session per minute | read |
 | `jobs` | read rows with status `open` | everything |
-| `applications` | insert only, to an open role, max 3 per email per role and 10 per email per day, resume path must match the row id | read, update, delete |
+| `applications` | insert only the candidate columns, to an open role, max 3 per email per role and 10 per email per day, resume path must match the row id; status and screening fields are forced clean by a trigger | read, update, delete |
 | `resumes` bucket | upload one PDF under `applications/<job>/<id>.pdf`, 10 MB max | read via signed URL, delete |
-| `admins` | nothing | read, add, remove (not self) |
+| `admins` | nothing | read, remove (not self); adding happens only through the invite function |
 | `godseye_settings`, `godseye_conversations`, `godseye_documents`, `interviews`, `godseye-docs` bucket | nothing | everything |
 
 Admin status is decided by one function, `is_admin()`, which checks the signed-in email against the `admins` table. Every admin policy and server function uses it.
@@ -35,7 +35,8 @@ Admin status is decided by one function, `is_admin()`, which checks the signed-i
 
 - `screen-application`: takes an application id, runs only on rows in `new` or `failed`, at most four attempts per application. Reads the resume with the service role and calls Claude.
 - `godseye`: enforces the daily cap and the per-visitor turn limit, treats the knowledge and documents as data, and asks the model for a strict JSON verdict so an out-of-scope question always gets the fixed refusal.
-- `ingest-document`, `start-interview`: verify the caller's session token is an admin before doing anything.
+- `ingest-document`, `start-interview`, `invite-admin`: verify the caller's session token is an admin before doing anything. Re-running `screen-application` on anything but a fresh application also requires an admin.
+- There is no public sign-up. Admins are added by an existing admin generating a one-time invite link; the allow-list cannot be claimed from outside.
 - All four reject browser requests whose `Origin` is not on the allow-list (`ALLOWED_ORIGINS` secret; defaults to the GitHub Pages site, trikhya.ai and localhost).
 
 ## Browser hardening
@@ -47,7 +48,8 @@ Admin status is decided by one function, `is_admin()`, which checks the signed-i
 
 ## Settings to keep switched on in Supabase (dashboard, not code)
 
-1. Authentication → Providers → Email: **Confirm email off** (we gate account creation by the allow-list instead), **minimum password length 10**, **leaked-password protection on**.
+1. Authentication → Sign In / Providers: **Allow new users to sign up: OFF** (admins arrive only through invite links). Email provider: **minimum password length 10**, **leaked-password protection on**.
+1a. Authentication → URL Configuration: add every site origin (`http://localhost:3000`, the Vercel URL, the GitHub Pages URL, `https://trikhya.ai`) to **Redirect URLs** so invite links can land on the admin page.
 2. Authentication → Rate limits: keep the defaults.
 3. Project Settings → API: rotate any key that has ever been pasted into a chat or a ticket.
 4. Storage: both buckets stay **private**.

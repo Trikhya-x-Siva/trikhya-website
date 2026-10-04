@@ -48,6 +48,15 @@ Deno.serve(async (req) => {
     if (error || !app) return json({ error: "application not found" }, 404);
     if (!["new", "failed"].includes(app.status)) return json({ ok: true, skipped: app.status });
     if ((app.screen_attempts ?? 0) >= MAX_ATTEMPTS) return json({ error: "too many attempts" }, 429);
+    // Public callers (the apply form) may only trigger the first run of a fresh application.
+    // Anything else (re-runs, failed rows, old rows) needs a signed-in admin.
+    const fresh = app.status === "new" && (app.screen_attempts ?? 0) === 0 && Date.now() - new Date(app.created_at).getTime() < 15 * 60 * 1000;
+    if (!fresh) {
+      const auth = req.headers.get("Authorization") ?? "";
+      const user = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
+      const { data: isAdmin } = await user.rpc("is_admin");
+      if (!isAdmin) return json({ error: "admins only" }, 403);
+    }
     await sb.from("applications").update({ status: "screening", screen_error: null, screen_attempts: (app.screen_attempts ?? 0) + 1 }).eq("id", app.id);
 
     const { data: job } = await sb.from("jobs").select("*").eq("id", app.job_id).single();

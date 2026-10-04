@@ -66,42 +66,25 @@ function Brand() {
 }
 
 function Login() {
-  const [mode, setMode] = useState<"signin" | "create">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [note, setNote] = useState("");
   const submit = async (e: FormEvent) => {
-    e.preventDefault(); setBusy(true); setErr(""); setNote("");
-    const sb = supabase()!;
-    if (mode === "create") {
-      const { data: ok } = await sb.rpc("is_allowlisted", { check_email: email });
-      if (!ok) { setErr("That email is not on the admin list. Ask an existing admin to add it first."); setBusy(false); return; }
-      if (password.length < 10) { setErr("Use at least 10 characters."); setBusy(false); return; }
-      const { data, error } = await sb.auth.signUp({ email, password });
-      setBusy(false);
-      if (error) setErr(error.message);
-      else if (data.user && !data.session) setNote("Account created. Email confirmation is switched on in Supabase, so check your inbox once, then sign in.");
-      return;
-    }
-    const { error } = await sb.auth.signInWithPassword({ email, password });
+    e.preventDefault(); setBusy(true); setErr("");
+    const { error } = await supabase()!.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) setErr(error.message === "Invalid login credentials" ? "That email and password do not match." : error.message);
   };
   return (
     <Panel>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <Label>{mode === "signin" ? "Sign in" : "Create account"}</Label>
-        <Pill onClick={() => { setMode(mode === "signin" ? "create" : "signin"); setErr(""); setNote(""); }}>{mode === "signin" ? "First time? Create account" : "Back to sign in"}</Pill>
-      </div>
+      <Label>Sign in</Label>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {mode === "create" ? <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Only emails already added by an admin can create an account.</span> : null}
         <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
-        <input type="password" required autoComplete={mode === "create" ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "create" ? "Choose a password, 10+ characters" : "Password"} className="adm-in" style={input} />
-        <button type="submit" disabled={busy} style={btn}>{busy ? "Please wait…" : mode === "create" ? "Create account" : "Sign in"}</button>
+        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="adm-in" style={input} />
+        <button type="submit" disabled={busy} style={btn}>{busy ? "Signing in…" : "Sign in"}</button>
         {err ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err}</span> : null}
-        {note ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.green }}>{note}</span> : null}
+        <span style={{ fontSize: 13, lineHeight: 1.5, color: C.dim }}>New here? Ask an existing admin for an invite link. There is no public sign-up.</span>
       </form>
     </Panel>
   );
@@ -137,7 +120,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
   const [error, setError] = useState("");
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [pagePick, setPagePick] = useState<string | null>(null);
-  const [showPw, setShowPw] = useState(false);
+  const [showPw, setShowPw] = useState(() => { try { return /type=(invite|magiclink|recovery)/.test(location.hash) || sessionStorage.getItem("trikhya-set-pw") === "1"; } catch { return false; } });
   const [manage, setManage] = useState<"hiring" | "godseye" | null>(null);
 
   const refresh = () => { loadEvents(days).then((e) => { setEvents(e); setError(""); setRefreshedAt(new Date()); }).catch((e) => setError(String(e.message || e))); };
@@ -169,7 +152,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
       </header>
 
       <main style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 28px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
-        {showPw ? <SetPassword onDone={() => setShowPw(false)} /> : null}
+        {showPw ? <SetPassword onDone={() => { setShowPw(false); try { sessionStorage.removeItem("trikhya-set-pw"); } catch { /* ignore */ } }} /> : null}
         {error ? <Panel><Empty text={`Could not load events: ${error}. Has the SQL migration been run in Supabase (${SUPABASE_URL})?`} /></Panel> : null}
         {manage === "hiring" ? <Hiring onBack={() => setManage(null)} /> : manage === "godseye" ? <GodseyeAdmin onBack={() => setManage(null)} /> : !agg ? <Empty text="Loading events…" /> : (
           <>
@@ -303,11 +286,15 @@ function Admins({ me }: { me: string }) {
   const [msg, setMsg] = useState("");
   const load = () => { supabase()!.from("admins").select("email, added_at").order("added_at").then(({ data, error }) => { if (error) setMsg(error.message); else setRows(data ?? []); }); };
   useEffect(load, []);
+  const [link, setLink] = useState("");
+  const [copied, setCopied] = useState(false);
   const add = async (e: FormEvent) => {
-    e.preventDefault(); setMsg("");
-    const { error } = await supabase()!.from("admins").insert({ email: email.trim().toLowerCase() });
-    if (error) setMsg(error.message.includes("duplicate") ? "That email is already an admin." : error.message); else { setEmail(""); setMsg("Added. They can now create their login from the sign-in screen."); load(); }
+    e.preventDefault(); setMsg(""); setLink("");
+    const { data, error } = await supabase()!.functions.invoke("invite-admin", { body: { email: email.trim().toLowerCase(), redirect_to: location.origin + location.pathname } });
+    if (error || data?.error) { setMsg(error?.message ?? data?.error); return; }
+    setLink(data.link); setEmail(""); setMsg(data.existing ? "They already had a login. This link signs them in once." : "Invite created."); load();
   };
+  const copy = async () => { try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { /* ignore */ } };
   const remove = async (target: string) => {
     if (!confirm(`Remove ${target} from the admin list? Their login will stop working.`)) return;
     const { error } = await supabase()!.from("admins").delete().eq("email", target);
@@ -317,10 +304,17 @@ function Admins({ me }: { me: string }) {
     <div style={grid(420)}>
       <Panel title="Add an admin">
         <form onSubmit={add} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Add a teammate&apos;s email. They then open the admin sign-in page, choose “Create account”, and set their own password. Only emails on this list can create an account or sign in.</span>
+          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Enter a teammate&apos;s email to create a one-time invite link. Send it to them yourself. Opening it signs them in, and they set a password from the dashboard. Links expire after 24 hours and work once.</span>
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@trikhya.ai" className="adm-in" style={input} />
-          <button type="submit" style={btn}>Add admin</button>
-          {msg ? <span style={{ fontSize: 13, color: msg.startsWith("Added") ? C.green : C.amber }}>{msg}</span> : null}
+          <button type="submit" style={btn}>Create invite link</button>
+          {msg ? <span style={{ fontSize: 13, color: msg.startsWith("Invite") || msg.startsWith("They") ? C.green : C.amber }}>{msg}</span> : null}
+          {link ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 12, border: `1px solid ${C.sky}`, background: C.bg }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, color: C.sky, letterSpacing: ".12em" }}>INVITE LINK · SHOWN ONCE</span>
+              <code style={{ fontFamily: MONO, fontSize: 12, color: C.mid, wordBreak: "break-all" }}>{link}</code>
+              <Pill on onClick={copy}>{copied ? "Copied" : "Copy link"}</Pill>
+            </div>
+          ) : null}
         </form>
       </Panel>
       <Panel title="Current admins" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{rows?.length ?? 0} TOTAL</span>}>

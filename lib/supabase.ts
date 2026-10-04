@@ -10,6 +10,6 @@ let client: SupabaseClient | null = null;
 /** Browser client with the publishable key. Safe to ship: RLS limits it to inserting events and, when signed in as an admin, reading them. */
 export function supabase(): SupabaseClient | null {
   if (!SUPABASE_URL || !SUPABASE_KEY) return null;
-  if (!client) client = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" } });
+  if (!client) client = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "implicit" } });
   return client;
 }

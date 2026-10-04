@@ -44,3 +44,6 @@ next-env.d.ts
 /docs/superpowers/
 /.claude/
 /.superpowers/
+
+# Supabase CLI scratch
+/supabase/.temp/
