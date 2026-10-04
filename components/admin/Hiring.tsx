@@ -338,7 +338,21 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
     const { data } = await supabase()!.from("applications").update(patch).eq("id", app.id).select().single();
     if (data) setApp(data as ApplicationRow); setBusy(false);
   };
-  const rescreen = async () => { setBusy(true); await supabase()!.from("applications").update({ status: "new", screen_error: null }).eq("id", app.id); await supabase()!.functions.invoke("screen-application", { body: { application_id: app.id } }).catch(() => undefined); setTimeout(async () => { const { data } = await supabase()!.from("applications").select("*").eq("id", app.id).single(); if (data) setApp(data as ApplicationRow); setBusy(false); }, 4000); };
+  const rescreen = async () => {
+    setBusy(true);
+    const sb = supabase()!;
+    await sb.from("applications").update({ status: "new", screen_error: null }).eq("id", app.id);
+    setApp((a) => ({ ...a, status: "screening", screen_error: null, score: null, must_have_pass: null }));
+    const { data: res } = await sb.functions.invoke("screen-application", { body: { application_id: app.id } }).catch(() => ({ data: null }));
+    // The function returns when it is done; refresh until the row has left "screening".
+    for (let i = 0; i < 10; i++) {
+      const { data } = await sb.from("applications").select("*").eq("id", app.id).single();
+      if (data) { setApp(data as ApplicationRow); if (!["new", "screening"].includes((data as ApplicationRow).status)) break; }
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    if (res?.error) setIvMsg("");
+    setBusy(false);
+  };
 
   const b = (app.breakdown ?? {}) as Record<string, { matched?: string[] | boolean; missing?: string[]; coverage?: number; candidate_top?: string | null; required?: string | null; candidate_years?: number; required_years?: number; all_covered?: boolean }>;
   const parsed = (app.parsed ?? {}) as { education?: { degree: string; field?: string | null; institution?: string | null; year?: number | null }[]; experience?: { company: string; role: string; years: number; summary: string }[]; skills?: string[]; languages?: { name: string; read: boolean; write: boolean }[]; total_experience_years?: number };
