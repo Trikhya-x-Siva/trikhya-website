@@ -15,7 +15,7 @@ export function ContactPage() {
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
 <img data-spin="1" data-parallax="0.3" src={MARK_WHITE} alt="" style={{ position: "absolute", right: "-10%", top: "4%", width: "min(56vw,780px)", opacity: ".12", pointerEvents: "none" }} />
-<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(56px,8vw,110px) clamp(20px,5vw,40px) clamp(64px,8vw,110px)", display: "flex", flexDirection: "column", gap: "28px" }}>
+<div style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(56px,6vw,88px)", display: "flex", flexDirection: "column", gap: "28px" }}>
 <div data-word="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".18em", display: "flex", gap: "12px", alignItems: "center" }}><span style={{ width: "28px", height: "1px", background: "#ffffff" }}></span>CONTACT</div>
 <h1 style={{ margin: "0", fontSize: "clamp(46px,6.6vw,100px)", lineHeight: ".95", fontWeight: "800", letterSpacing: "-.045em", maxWidth: "1050px" }}><span data-word="1" style={{ display: "inline-block" }}>Bring</span> <span data-word="1" style={{ display: "inline-block" }}>us</span> <span data-word="1" style={{ display: "inline-block" }}>the</span> <span data-word="1" style={{ display: "inline-block" }}>problem.</span> <span data-word="1" style={{ display: "inline-block" }}>We’ll</span> <span data-word="1" style={{ display: "inline-block" }}>bring</span> <span data-word="1" style={{ display: "inline-block" }}>the</span> <span data-word="1" style={{ display: "inline-block", color: "#BFE6FA" }}>machinery.</span></h1>
 <p data-word="1" style={{ margin: "0", fontSize: "clamp(18px,1.7vw,23px)", lineHeight: "1.5", maxWidth: "660px", textWrap: "pretty" }}>Whether it is a first idea or a stalled pilot, we would like to hear about it.</p>
@@ -23,7 +23,7 @@ export function ContactPage() {
 </section>
 
 <section id="contact" style={{ background: "#0E1116", color: "#ffffff" }}>
-<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(64px,9vw,120px) clamp(20px,5vw,40px) clamp(80px,11vw,140px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,460px),1fr))", gap: "72px" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(56px,7vw,96px)", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,460px),1fr))", gap: "72px" }}>
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>SEND A MESSAGE</span>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Tell us what you’re working on.</h2>
