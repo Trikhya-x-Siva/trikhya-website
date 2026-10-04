@@ -16,6 +16,12 @@ const LINKS = [
 const E = "cubic-bezier(.2,.7,.2,1)";
 
 export function Header() {
+  const adminPath = usePathname();
+  if (adminPath?.includes("/admin")) return null;
+  return <HeaderInner />;
+}
+
+function HeaderInner() {
   const pathname = (usePathname() || "/").replace(/\/?$/, "/");
   const [scrolled, setScrolled] = useState(false);
   const [wide, setWide] = useState(true);

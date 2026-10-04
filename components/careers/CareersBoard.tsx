@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { APPLY_EMAIL, JOBS, type Job } from "@/content/jobs";
+import { track } from "@/lib/analytics";
 
 const MONO = "'JetBrains Mono',monospace";
 const E = "cubic-bezier(.2,.7,.2,1)";
@@ -51,7 +52,7 @@ export function CareersBoard() {
     fromHash(); addEventListener("hashchange", fromHash);
     return () => removeEventListener("hashchange", fromHash);
   }, []);
-  const open = (id: string) => { history.replaceState(null, "", `#job=${id}`); setOpenId(id); };
+  const open = (id: string) => { history.replaceState(null, "", `#job=${id}`); setOpenId(id); track("job_open", { job: id }); };
   const close = () => { history.replaceState(null, "", location.pathname + location.search); setOpenId(null); };
   const job = JOBS.find((j) => j.id === openId) || null;
 
@@ -122,7 +123,7 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
     const url = `${location.origin}${location.pathname}#job=${job.id}`;
     try { await navigator.clipboard.writeText(url); }
     catch { const t = document.createElement("textarea"); t.value = url; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
-    setCopied(true); setTimeout(() => setCopied(false), 2200);
+    setCopied(true); setTimeout(() => setCopied(false), 2200); track("job_link_copy", { job: job.id });
   };
   const applyHref = `mailto:${APPLY_EMAIL}?subject=${encodeURIComponent(`Application: ${job.title}`)}&body=${encodeURIComponent(`Hi Trikhya,\n\nI'd like to apply for the ${job.title} role (${job.location}).\n\n`)}`;
   const meta = [["TEAM", job.team], ["LOCATION", job.location], ["TYPE", job.type], ["EXPERIENCE", job.experience], ["POSTED", new Date(job.posted).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })]];
@@ -167,7 +168,7 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
               <span style={{ fontSize: 13, color: "#8a94a1" }}>You will hear back from us within a week, whatever the outcome.</span>
             </span>
           </div>
-          <a href={applyHref} data-magnet="1" data-hover="background:#8fd3f7;" style={{ background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</a>
+          <a href={applyHref} data-track="job_apply" data-job={job.id} data-magnet="1" data-hover="background:#8fd3f7;" style={{ background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</a>
         </div>
       </div>
     </div>

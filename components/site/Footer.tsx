@@ -2,10 +2,17 @@
 
 import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
+import { usePathname } from "next/navigation";
 
 const SOCIAL = [["https://www.linkedin.com/company/trikhya-intelligence-foundry", "LinkedIn"], ["https://x.com/", "X"], ["https://github.com/", "GitHub"], ["https://www.youtube.com/", "YouTube"], ["https://www.instagram.com/", "Instagram"]];
 
 export function Footer() {
+  const adminPath = usePathname();
+  if (adminPath?.includes("/admin")) return null;
+  return <FooterInner />;
+}
+
+function FooterInner() {
   return (
     <footer style={{ background: "#0E1116", color: "#ffffff", borderTop: "1px solid #222831" }}>
       <div style={{ maxWidth: 1360, margin: "0 auto", padding: "clamp(48px,7vw,72px) clamp(20px,5vw,40px) 40px", display: "flex", flexDirection: "column", gap: 36 }}>

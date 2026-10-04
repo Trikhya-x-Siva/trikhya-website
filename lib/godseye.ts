@@ -1,3 +1,4 @@
+import { track } from "./analytics";
 /* Godseye, the floating site assistant from the design. Answers from a small
  * knowledge base; a model-backed answer is used only if window.claude exists. */
 
@@ -73,6 +74,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     };
     const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "Good question. A person from our team can answer that properly: write to hello@trikhya.ai and we'll reply within two working days."])[1] as string;
     const ask = async (q: string) => {
+      track("godseye_question", { q: q.slice(0, 300) });
       if (!q.trim() || busy) return;
       busy = true; sugg.style.display = "none"; bubble("me", q); input.value = ""; const t = typing();
       let a: string | null = null;
@@ -95,7 +97,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     };
     fit(); addEventListener("resize", fit);
     bubble("bot", "Hi, I'm Godseye. Ask me anything about Trikhya Intelligence Foundry.");
-    $("[data-g-btn]").onclick = () => setOpen(!open); $("[data-g-close]").onclick = () => setOpen(false);
+    $("[data-g-btn]").onclick = () => { if (!open) track("godseye_open"); setOpen(!open); }; $("[data-g-close]").onclick = () => setOpen(false);
     ($("[data-g-form]") as HTMLFormElement).onsubmit = (e) => { e.preventDefault(); ask(input.value); };
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && open) setOpen(false); });
     const mark = $("[data-g-btn] img");

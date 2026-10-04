@@ -28,6 +28,8 @@ jobs:
         env:
           # Serves from https://<owner>.github.io/<repo>/
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_SUPABASE_URL: https://hbtrjucvxotoshqjctnx.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_vxq2nZeL4776rvSiG5lUQQ__DbTPBRJ
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out

@@ -4,13 +4,14 @@ import { Fragment, useRef, useState } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
+import { track } from "@/lib/analytics";
 
 export function ContactPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   usePageMotion(rootRef);
   const [sent, setSent] = useState(false);
   const notSent = !sent;
-  const submit = (e: React.FormEvent) => { e.preventDefault(); setSent(true); };
+  const submit = (e: React.FormEvent) => { e.preventDefault(); setSent(true); track("contact_submit"); };
   return (
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
