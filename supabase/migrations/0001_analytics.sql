@@ -8,7 +8,7 @@ create table if not exists public.admins (
   email text primary key,
   added_at timestamptz not null default now()
 );
-insert into public.admins (email) values ('developer.siva@trikhya.ai') on conflict do nothing;
+insert into public.admins (email) values ('developer.siva@trikhya.ai'), ('siva.trikhya@gmail.com') on conflict do nothing;
 
 -- One row per interaction. Written anonymously by the website, read only by admins.
 create table if not exists public.events (

@@ -40,11 +40,12 @@ export function AdminApp() {
 }
 
 const btn: React.CSSProperties = { font: "inherit", fontWeight: 700, fontSize: 15, padding: "12px 22px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer", alignSelf: "flex-start" };
-const input: React.CSSProperties = { font: "inherit", fontSize: 16, padding: "13px 16px", background: C.bg, border: `1px solid ${C.line}`, color: C.ink, outline: "none", width: "100%" };
+const input: React.CSSProperties = { font: "inherit", fontSize: 16, padding: "13px 16px", background: C.bg, border: `1px solid ${C.line}`, color: C.ink, outline: "none", width: "100%", boxSizing: "border-box", borderRadius: 0 };
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.ink, fontFamily: SANS, display: "grid", placeItems: "center", padding: 24 }}>
+      <style>{`.adm-in:focus{border-color:${C.sky}!important} .adm-in:-webkit-autofill,.adm-in:-webkit-autofill:focus{-webkit-text-fill-color:${C.ink};-webkit-box-shadow:0 0 0 1000px ${C.bg} inset;caret-color:${C.ink};transition:background-color 9999s}`}</style>
       <div style={{ width: "min(460px,100%)", display: "flex", flexDirection: "column", gap: 24 }}>
         <Brand />
         {children}
@@ -79,9 +80,9 @@ function Login() {
       ) : (
         <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>Enter your Trikhya email. You will get a one-time link, no password.</span>
-          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" style={input} />
+          <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
           <button type="submit" disabled={state === "sending"} style={btn}>{state === "sending" ? "Sending…" : "Send sign-in link"}</button>
-          {state === "error" ? <span style={{ fontSize: 13, color: C.amber }}>{err}</span> : null}
+          {state === "error" ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err.replace(/^For security purposes, /, "")}</span> : null}
         </form>
       )}
     </Panel>
