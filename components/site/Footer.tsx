@@ -23,7 +23,6 @@ export function Footer() {
               <a key={href} href={href} target="_blank" rel="noopener" data-sweep="1" data-hover="border-color:#4FB8EE;" style={{ border: "1px solid #2a313c", padding: "10px 18px", borderRadius: 999, fontSize: 14, fontWeight: 600, color: "#d4dae2" }}>{label} ↗</a>
             ))}
           </div>
-          <a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-hover="background:#8fd3f7;color:#0E1116;" style={{ display: "flex", alignItems: "center", gap: 10, background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 15, padding: "12px 22px", borderRadius: 999 }}>✉ hello@trikhya.ai</a>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16, fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6f7986" }}>
           <span>© 2026 Trikhya Intelligence Foundry</span><span>Privacy · Terms</span>
