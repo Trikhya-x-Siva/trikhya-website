@@ -49,7 +49,12 @@ ${docsText}`;
     const TOPICS = ["company", "services", "solutions", "approach", "hiring", "contact", "pricing", "insights", "greeting", "out_of_scope"];
     let in_scope = true, answer = "", topic = "company";
     try { const j = parseJson<{ in_scope: boolean; answer: string; topic?: string }>(raw); in_scope = j.in_scope !== false; answer = String(j.answer ?? "").trim(); if (j.topic && TOPICS.includes(j.topic)) topic = j.topic; }
-    catch { answer = raw.trim(); }
+    catch {
+      // Last resort: lift the answer field out of whatever came back, never show raw JSON to a visitor.
+      const m = raw.match(/"answer"\s*:\s*"((?:[^"\\]|\\.)*)"/); answer = m ? m[1].replace(/\\"/g, '"').replace(/\\n/g, " ").trim() : "";
+      if (/"in_scope"\s*:\s*false/.test(raw)) in_scope = false;
+    }
+    if (answer.startsWith("{")) answer = "";
     if (!in_scope || !answer) { in_scope = false; answer = s.refusal; topic = "out_of_scope"; }
 
     const latency_ms = Date.now() - t0;

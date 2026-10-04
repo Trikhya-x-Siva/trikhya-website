@@ -36,12 +36,20 @@ export async function chat(provider: string, model: string, messages: Msg[], max
   throw new Error("Sarvam returned no answer text (finish_reason=" + (j.choices?.[0]?.finish_reason ?? "?") + ")");
 }
 
-/** Pull the first JSON object out of a model reply, tolerating code fences and chatter. */
+/** Pull the JSON object out of a model reply, tolerating code fences, chatter, double-encoding and escaped quotes. */
 export function parseJson<T>(raw: string): T {
-  const s = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  try { return JSON.parse(s) as T; } catch { /* fall through */ }
-  const a = s.indexOf("{"), b = s.lastIndexOf("}");
-  if (a >= 0 && b > a) return JSON.parse(s.slice(a, b + 1)) as T;
+  let s = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try { const v = JSON.parse(s); if (typeof v === "string") { s = v.trim(); continue; } if (v && typeof v === "object") return v as T; } catch { /* keep trying */ }
+    const a = s.indexOf("{"), b = s.lastIndexOf("}");
+    if (a >= 0 && b > a) {
+      const inner = s.slice(a, b + 1);
+      try { const v = JSON.parse(inner); if (typeof v === "string") { s = v.trim(); continue; } if (v && typeof v === "object") return v as T; } catch { /* keep trying */ }
+      s = inner.replace(/\\"/g, '"');
+      continue;
+    }
+    break;
+  }
   throw new Error("Model did not return JSON");
 }
 
