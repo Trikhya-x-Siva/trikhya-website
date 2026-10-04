@@ -116,7 +116,7 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
             <div style={grid(180)}>
               <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <span style={{ fontSize: 13, color: C.mid }}>Provider</span>
-                <select value={s.provider} onChange={(e) => { set("provider", e.target.value); set("model", e.target.value === "sarvam" ? "sarvam-m" : "claude-haiku-4-5"); }} className="adm-in" style={{ ...input, appearance: "none" }}><option value="sarvam">Sarvam</option><option value="anthropic">Anthropic</option></select>
+                <select value={s.provider} onChange={(e) => { set("provider", e.target.value); set("model", e.target.value === "sarvam" ? "sarvam-105b" : "claude-haiku-4-5"); }} className="adm-in" style={{ ...input, appearance: "none" }}><option value="sarvam">Sarvam</option><option value="anthropic">Anthropic</option></select>
               </label>
               <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <span style={{ fontSize: 13, color: C.mid }}>Model</span>

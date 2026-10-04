@@ -104,7 +104,7 @@ create table if not exists public.godseye_settings (
   id int primary key default 1 check (id = 1),
   enabled boolean not null default false,
   provider text not null default 'sarvam',
-  model text not null default 'sarvam-m',
+  model text not null default 'sarvam-105b',
   knowledge text not null default '',
   refusal text not null default 'That is outside what I cover. I only answer questions about Trikhya Intelligence Foundry. An assistant like this, scoped to your own business and data, is exactly what we build.',
   handoff text not null default 'For anything that needs a person, use the Contact page and the team will reply within two working days.',

@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
 
     const { data: job } = await sb.from("jobs").select("*").eq("id", app.job_id).single();
     const { data: settings } = await sb.from("godseye_settings").select("provider, model").eq("id", 1).single();
-    const provider = settings?.provider ?? "sarvam", model = settings?.model ?? "sarvam-m";
+    const provider = settings?.provider ?? "sarvam", model = settings?.model ?? "sarvam-105b";
 
     try {
       // 1. Resume text (first ~12k characters is plenty for a resume).

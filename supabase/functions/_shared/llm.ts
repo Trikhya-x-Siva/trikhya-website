@@ -17,9 +17,11 @@ export async function chat(provider: string, model: string, messages: Msg[], max
     return (j.content ?? []).filter((b: { type: string }) => b.type === "text").map((b: { text: string }) => b.text).join("").trim();
   }
   const key = Deno.env.get("SARVAM_API_KEY"); if (!key) throw new Error("SARVAM_API_KEY is not set");
+  // sarvam-m was retired in 2026; map old settings rows forward.
+  const m = model === "sarvam-m" || !model ? "sarvam-105b" : model;
   const r = await fetch("https://api.sarvam.ai/v1/chat/completions", {
     method: "POST", headers: { "api-subscription-key": key, "content-type": "application/json" },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
+    body: JSON.stringify({ model: m, messages, max_tokens: maxTokens, temperature }),
   });
   if (!r.ok) throw new Error(`Sarvam ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const j = await r.json();
