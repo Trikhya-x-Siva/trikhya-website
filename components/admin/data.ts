@@ -106,11 +106,11 @@ export function aggregate(ev: Ev[], days: number) {
   const outbound = countBy(clicks.filter((c) => c.props.outbound), (c) => String(c.props.href || ""));
 
   // Careers funnel.
-  const jobs = new Map<string, { opens: number; copies: number; applies: number }>();
+  const jobs = new Map<string, { opens: number; copies: number; applies: number; applied: number }>();
   ev.forEach((e) => {
     const j = e.props.job as string | undefined; if (!j) return;
-    const r = jobs.get(j) ?? { opens: 0, copies: 0, applies: 0 };
-    if (e.name === "job_open") r.opens++; else if (e.name === "job_link_copy") r.copies++; else if (e.name === "job_apply") r.applies++;
+    const r = jobs.get(j) ?? { opens: 0, copies: 0, applies: 0, applied: 0 };
+    if (e.name === "job_open") r.opens++; else if (e.name === "job_link_copy") r.copies++; else if (e.name === "job_apply") r.applies++; else if (e.name === "job_applied") r.applied++;
     jobs.set(j, r);
   });
 

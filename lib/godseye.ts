@@ -1,4 +1,5 @@
 import { track } from "./analytics";
+import { supabase } from "./supabase";
 /* Godseye, the floating site assistant from the design. Answers from a small
  * knowledge base; a model-backed answer is used only if window.claude exists. */
 
@@ -53,6 +54,20 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     const $ = <T extends HTMLElement>(s: string) => root.querySelector(s) as T;
     const panel = $<HTMLElement>("[data-g-panel]"), log = $<HTMLElement>("[data-g-log]"), sugg = $<HTMLElement>("[data-g-sugg]"), input = $<HTMLInputElement>("[data-g-in]");
     let open = false, busy = false; const history: [string, string][] = [];
+    const turns: { role: "user" | "assistant"; content: string }[] = [];
+    let sessionId = ""; try { sessionId = sessionStorage.getItem("trikhya-session") || ""; } catch { /* ignore */ }
+    if (!sessionId) sessionId = "g-" + Math.random().toString(36).slice(2, 14);
+    let live = false;
+    const sb = supabase();
+    // Server answer: null means "fall back to the fixed answers".
+    const remote = async (q: string): Promise<string | null> => {
+      if (!sb || !live) return null;
+      try {
+        const { data, error } = await sb.functions.invoke("godseye", { body: { session_id: sessionId, question: q, history: turns.slice(-8), path: location.pathname } });
+        if (error || !data || data.fallback || typeof data.answer !== "string") return null;
+        return data.answer;
+      } catch { return null; }
+    };
     const setOpen = (v: boolean) => {
       open = v;
       css(panel, v ? { opacity: "1", transform: "none", pointerEvents: "auto" } : { opacity: "0", transform: "translateY(12px) scale(.96)", pointerEvents: "none" });
@@ -78,16 +93,19 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
       if (!q.trim() || busy) return;
       busy = true; sugg.style.display = "none"; bubble("me", q); input.value = ""; const t = typing();
       let a: string | null = null;
-      try { if (window.claude?.complete) { const convo = history.slice(-6).map((h) => `${h[0]}: ${h[1]}`).join("\n"); a = await window.claude.complete(`${SYSTEM}\n\n${convo}\nVisitor: ${q}\nGodseye:`); } } catch { a = null; }
+      a = await remote(q);
       if (!a) { await new Promise((r) => setTimeout(r, 700)); a = canned(q); }
-      a = String(a).trim(); history.push(["Visitor", q], ["Godseye", a]); t.remove(); bubble("bot", a); busy = false;
+      a = String(a).trim(); history.push(["Visitor", q], ["Godseye", a]); turns.push({ role: "user", content: q }, { role: "assistant", content: a }); t.remove(); bubble("bot", a); busy = false;
     };
-    SUGG.forEach((s) => {
+    const renderSugg = (items: string[]) => { sugg.innerHTML = ""; items.forEach((s) => {
       const c = document.createElement("button"); c.type = "button"; c.textContent = s;
       css(c, { background: "transparent", border: `1px solid ${LINE}`, color: "#d4dae2", borderRadius: "999px", padding: "8px 12px", font: `500 13px ${F}` });
       c.onmouseenter = () => css(c, { borderColor: L, color: L }); c.onmouseleave = () => css(c, { borderColor: LINE, color: "#d4dae2" }); c.onclick = () => ask(s);
       sugg.appendChild(c);
-    });
+    }); };
+    renderSugg(SUGG);
+    // Ask the server whether model answers are on and which starter questions to show.
+    if (sb) Promise.resolve(sb.rpc("godseye_public")).then(({ data }) => { const row = Array.isArray(data) ? data[0] : data; if (row) { live = !!row.enabled; if (Array.isArray(row.starter_questions) && row.starter_questions.length) renderSugg(row.starter_questions); } }).catch(() => undefined);
     const fit = () => {
       const sm = innerWidth < 640;
       $("[data-g-lbl]").style.display = sm ? "none" : "";

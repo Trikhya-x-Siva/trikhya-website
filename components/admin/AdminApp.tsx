@@ -8,6 +8,8 @@ import { withBase } from "@/lib/paths";
 import { JOBS } from "@/content/jobs";
 import { aggregate, loadEvents, pageName, RANGES, type Agg, type Ev } from "./data";
 import { Bars, C, Chart, Empty, fmt, Kpi, Label, MONO, Panel, pct, Pill, SANS, secs, Table } from "./ui";
+import { Hiring } from "./Hiring";
+import { GodseyeAdmin } from "./GodseyeAdmin";
 
 const TABS = ["Overview", "Pages", "Careers", "Godseye", "Audience", "Live", "Admins"] as const;
 type Tab = (typeof TABS)[number];
@@ -136,6 +138,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [pagePick, setPagePick] = useState<string | null>(null);
   const [showPw, setShowPw] = useState(false);
+  const [manage, setManage] = useState<"hiring" | "godseye" | null>(null);
 
   const refresh = () => { loadEvents(days).then((e) => { setEvents(e); setError(""); setRefreshedAt(new Date()); }).catch((e) => setError(String(e.message || e))); };
   useEffect(refresh, [days]);
@@ -160,7 +163,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
             </div>
           </div>
           <nav role="tablist" style={{ display: "flex", gap: 28 }}>
-            {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} className="adm-tab" onClick={() => { setTab(t); setPagePick(null); }}>{t}</button>)}
+            {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} className="adm-tab" onClick={() => { setTab(t); setPagePick(null); setManage(null); }}>{t}</button>)}
           </nav>
         </div>
       </header>
@@ -168,12 +171,12 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
       <main style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 28px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
         {showPw ? <SetPassword onDone={() => setShowPw(false)} /> : null}
         {error ? <Panel><Empty text={`Could not load events: ${error}. Has the SQL migration been run in Supabase (${SUPABASE_URL})?`} /></Panel> : null}
-        {!agg ? <Empty text="Loading events…" /> : (
+        {manage === "hiring" ? <Hiring onBack={() => setManage(null)} /> : manage === "godseye" ? <GodseyeAdmin onBack={() => setManage(null)} /> : !agg ? <Empty text="Loading events…" /> : (
           <>
             {tab === "Overview" ? <Overview a={agg} days={days} onPage={(p) => { setPagePick(p); setTab("Pages"); }} /> : null}
             {tab === "Pages" ? <Pages a={agg} pick={pagePick} setPick={setPagePick} /> : null}
-            {tab === "Careers" ? <Careers a={agg} /> : null}
-            {tab === "Godseye" ? <Godseye a={agg} /> : null}
+            {tab === "Careers" ? <Careers a={agg} onManage={() => setManage("hiring")} /> : null}
+            {tab === "Godseye" ? <Godseye a={agg} onManage={() => setManage("godseye")} /> : null}
             {tab === "Audience" ? <Audience a={agg} /> : null}
             {tab === "Live" ? <Live events={events!} /> : null}
             {tab === "Admins" ? <Admins me={email} /> : null}
@@ -232,27 +235,36 @@ function Pages({ a, pick, setPick }: { a: Agg; pick: string | null; setPick: (p:
   );
 }
 
-function Careers({ a }: { a: Agg }) {
-  const rows = JOBS.map((j) => { const r = a.jobs.get(j.id) ?? { opens: 0, copies: 0, applies: 0 }; return [j.title, fmt(r.opens), fmt(r.copies), fmt(r.applies), pct(r.opens ? r.applies / r.opens : 0)]; });
+function Careers({ a, onManage }: { a: Agg; onManage: () => void }) {
+  const rows = JOBS.map((j) => { const r = a.jobs.get(j.id) ?? { opens: 0, copies: 0, applies: 0, applied: 0 }; return [j.title, fmt(r.opens), fmt(r.copies), fmt(r.applies), fmt(r.applied), pct(r.opens ? r.applied / r.opens : 0)]; });
   const careers = a.pageRows.find((p) => p.path.replace(/\/$/, "").endsWith("/careers"));
-  const totals = [...a.jobs.values()].reduce((t, r) => ({ opens: t.opens + r.opens, copies: t.copies + r.copies, applies: t.applies + r.applies }), { opens: 0, copies: 0, applies: 0 });
+  const totals = [...a.jobs.values()].reduce((t, r) => ({ opens: t.opens + r.opens, copies: t.copies + r.copies, applies: t.applies + r.applies, applied: t.applied + r.applied }), { opens: 0, copies: 0, applies: 0, applied: 0 });
   return (
     <>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 14, color: C.mid }}>How the careers page performs. Roles, application forms and candidates live in hiring management.</span>
+        <button type="button" onClick={onManage} style={{ font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" }}>Hiring management →</button>
+      </div>
       <div style={grid(200)}>
         <Kpi label="Careers page views" value={fmt(careers?.views ?? 0)} sub={`${careers?.sessions ?? 0} sessions`} />
         <Kpi label="Jobs opened" value={fmt(totals.opens)} />
         <Kpi label="Links copied" value={fmt(totals.copies)} />
-        <Kpi label="Apply clicks" value={fmt(totals.applies)} accent={C.green} sub={pct(totals.opens ? totals.applies / totals.opens : 0) + " of opens"} />
+        <Kpi label="Apply clicks" value={fmt(totals.applies)} />
+        <Kpi label="Applications submitted" value={fmt(totals.applied)} accent={C.green} sub={pct(totals.opens ? totals.applied / totals.opens : 0) + " of opens"} />
       </div>
-      <Panel title="Per role"><Table head={["Role", "Opened", "Link copied", "Apply clicked", "Apply rate"]} rows={rows} /></Panel>
+      <Panel title="Per role"><Table head={["Role", "Opened", "Link copied", "Apply clicked", "Applied", "Conversion"]} rows={rows} /></Panel>
     </>
   );
 }
 
-function Godseye({ a }: { a: Agg }) {
+function Godseye({ a, onManage }: { a: Agg; onManage: () => void }) {
   const qs = a.godseye.questions;
   return (
     <>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 14, color: C.mid }}>Usage of the assistant. Its knowledge, behaviour, on/off switch and full conversations live in Godseye management.</span>
+        <button type="button" onClick={onManage} style={{ font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" }}>Godseye management →</button>
+      </div>
       <div style={grid(200)}>
         <Kpi label="Chat opened" value={fmt(a.godseye.opens)} />
         <Kpi label="Questions asked" value={fmt(qs.length)} sub={`${(a.godseye.opens ? qs.length / a.godseye.opens : 0).toFixed(1)} per open`} />

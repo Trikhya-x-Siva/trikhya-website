@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { APPLY_EMAIL, JOBS, type Job } from "@/content/jobs";
+import { APPLY_EMAIL } from "@/content/jobs";
+import type { JobRow as Job } from "@/content/hiring-fields";
+import { useOpenJobs } from "@/lib/hiring";
+import { ApplyForm } from "./ApplyForm";
 import { track } from "@/lib/analytics";
 
 const MONO = "'JetBrains Mono',monospace";
@@ -20,6 +23,7 @@ const matches = (j: Job, f: Filters, skip?: keyof Filters) =>
 const uniq = (xs: string[]) => [...new Set(xs)];
 
 export function CareersBoard() {
+  const { jobs: JOBS } = useOpenJobs();
   const [filters, setFilters] = useState<Filters>(EMPTY);
   const [sort, setSort] = useState<SortKey>("newest");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -36,7 +40,7 @@ export function CareersBoard() {
     if (sort === "title") return [...list].sort((a, b) => a.title.localeCompare(b.title));
     if (sort === "experience") return [...list].sort((a, b) => a.level - b.level);
     return [...list].sort((a, b) => b.posted.localeCompare(a.posted));
-  }, [filters, sort]);
+  }, [filters, sort, JOBS]);
 
   const set = (key: keyof Filters, value: string, exact = false) => setFilters((f) => {
     const next = { ...f, [key]: exact ? value : f[key] === value ? "" : value };
@@ -53,8 +57,9 @@ export function CareersBoard() {
     return () => removeEventListener("hashchange", fromHash);
   }, []);
   const open = (id: string) => { history.replaceState(null, "", `#job=${id}`); setOpenId(id); track("job_open", { job: id }); };
+  const openIds = (j: Job) => j.slug;
   const close = () => { history.replaceState(null, "", location.pathname + location.search); setOpenId(null); };
-  const job = JOBS.find((j) => j.id === openId) || null;
+  const job = JOBS.find((j) => j.slug === openId || j.id === openId) || null;
 
   const selectStyle: React.CSSProperties = { font: "inherit", fontSize: 14, fontWeight: 600, height: 42, padding: "0 36px 0 14px", borderRadius: 999, border: "1px solid #2a313c", background: "#0E1116 url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%238a94a1' stroke-width='1.6' stroke-linecap='round'/></svg>\") no-repeat right 14px center", color: "#d4dae2", appearance: "none", WebkitAppearance: "none", cursor: "pointer", minWidth: 0, transition: `border-color .25s ${E}` };
   const field = (label: string, key: keyof Filters, opts: string[]) => (
@@ -90,7 +95,7 @@ export function CareersBoard() {
       </div>
       <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid #2a313c" }}>
         {visible.map((r) => (
-          <button key={r.id} type="button" onClick={() => open(r.id)} data-spot="1" data-hover="color:#4FB8EE;padding-left:12px;" style={{ cursor: "pointer", font: "inherit", textAlign: "left", background: "none", border: "none", borderBottom: "1px solid #2a313c", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, alignItems: "center", padding: "28px 0", color: "#ffffff", transition: "padding .25s, color .25s", width: "100%" }}>
+          <button key={r.id} type="button" onClick={() => open(openIds(r))} data-spot="1" data-hover="color:#4FB8EE;padding-left:12px;" style={{ cursor: "pointer", font: "inherit", textAlign: "left", background: "none", border: "none", borderBottom: "1px solid #2a313c", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, alignItems: "center", padding: "28px 0", color: "#ffffff", transition: "padding .25s, color .25s", width: "100%" }}>
             <span style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.01em" }}>{r.title}</span>
             <span style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".1em", color: "#8a94a1" }}>{r.team.toUpperCase()} · {r.type.toUpperCase()}</span>
             <span style={{ fontSize: 16, color: "#aab3bf" }}>{r.location}</span>
@@ -109,6 +114,8 @@ export function CareersBoard() {
 function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
   const panel = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
+  const [view, setView] = useState<"role" | "apply" | "done">("role");
+  const [appId, setAppId] = useState("");
 
   useEffect(() => {
     const prev = document.body.style.overflow; document.body.style.overflow = "hidden";
@@ -120,12 +127,11 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
   }, [onClose]);
 
   const share = async () => {
-    const url = `${location.origin}${location.pathname}#job=${job.id}`;
+    const url = `${location.origin}${location.pathname}#job=${job.slug}`;
     try { await navigator.clipboard.writeText(url); }
     catch { const t = document.createElement("textarea"); t.value = url; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
-    setCopied(true); setTimeout(() => setCopied(false), 2200); track("job_link_copy", { job: job.id });
+    setCopied(true); setTimeout(() => setCopied(false), 2200); track("job_link_copy", { job: job.slug });
   };
-  const applyHref = `mailto:${APPLY_EMAIL}?subject=${encodeURIComponent(`Application: ${job.title}`)}&body=${encodeURIComponent(`Hi Trikhya,\n\nI'd like to apply for the ${job.title} role (${job.location}).\n\n`)}`;
   const meta = [["TEAM", job.team], ["LOCATION", job.location], ["TYPE", job.type], ["EXPERIENCE", job.experience], ["POSTED", new Date(job.posted).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })]];
   const iconBtn = (label: string, onClick: () => void, svg: React.ReactNode) => (
     <button type="button" aria-label={label} title={label} onClick={onClick} style={{ cursor: "pointer", width: 40, height: 40, borderRadius: "50%", border: "1px solid rgba(255,255,255,.5)", background: "transparent", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>{svg}</button>
@@ -152,13 +158,23 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
           </div>
         </div>
         <div style={{ overflowY: "auto", padding: "28px", display: "flex", flexDirection: "column", gap: 28 }}>
+          {view === "apply" ? <ApplyForm job={job} onBack={() => setView("role")} onDone={(id) => { setAppId(id); setView("done"); }} /> : null}
+          {view === "done" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "24px 0" }}>
+              <span style={{ fontSize: 32, fontWeight: 800, color: "#4FB8EE", letterSpacing: "-.02em" }}>Application received.</span>
+              <span style={{ fontSize: 17, lineHeight: 1.55, color: "#d4dae2" }}>Thank you for applying for the {job.title} role. A person on the team reads every application. You will hear back within a week, whatever the outcome.</span>
+              <span style={{ fontFamily: MONO, fontSize: 12, color: "#8a94a1" }}>REFERENCE · {appId.slice(0, 8).toUpperCase()}</span>
+            </div>
+          ) : null}
+          {view === "role" ? <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 16, padding: "18px 20px", border: "1px solid #2a313c", background: "#0E1116" }}>
             {meta.map(([k, v]) => <div key={k} style={{ display: "flex", flexDirection: "column", gap: 4 }}><span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".12em", color: "#8a94a1" }}>{k}</span><span style={{ fontSize: 15, color: "#ffffff" }}>{v}</span></div>)}
           </div>
           <p style={{ margin: 0, fontSize: 18, lineHeight: 1.55, color: "#dde2e8" }}>{job.summary}</p>
           {list("WHAT YOU WILL DO", job.responsibilities)}
           {list("WHAT WE ARE LOOKING FOR", job.requirements)}
-          {list("NICE TO HAVE", job.niceToHave)}
+          {list("NICE TO HAVE", job.nice_to_have)}
+          </> : null}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, flexWrap: "wrap", padding: "18px 28px", borderTop: "1px solid #2a313c", background: "#161a21" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -168,7 +184,7 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
               <span style={{ fontSize: 13, color: "#8a94a1" }}>You will hear back from us within a week, whatever the outcome.</span>
             </span>
           </div>
-          <a href={applyHref} data-track="job_apply" data-job={job.id} data-hover="background:#8fd3f7;" style={{ background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</a>
+          {view === "role" ? <button type="button" onClick={() => { setView("apply"); track("job_apply", { job: job.slug }); }} data-hover="background:#8fd3f7;" style={{ font: "inherit", cursor: "pointer", border: "none", background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</button> : view === "done" ? <button type="button" onClick={onClose} style={{ font: "inherit", cursor: "pointer", border: "1px solid #2a313c", background: "transparent", color: "#ffffff", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Close</button> : null}
         </div>
       </div>
     </div>
