@@ -64,42 +64,25 @@ function Brand() {
 }
 
 function Login() {
-  const [mode, setMode] = useState<"password" | "link">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const submit = async (e: FormEvent) => {
-    e.preventDefault(); setState("sending"); setErr("");
-    const sb = supabase()!;
-    const { error } = mode === "password"
-      ? await sb.auth.signInWithPassword({ email, password })
-      : await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-    if (error) { setErr(error.message.replace(/^For security purposes, /, "")); setState("error"); }
-    else setState(mode === "link" ? "sent" : "idle");
+    e.preventDefault(); setBusy(true); setErr("");
+    const { error } = await supabase()!.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) setErr(error.message === "Invalid login credentials" ? "That email and password do not match." : error.message);
   };
   return (
     <Panel>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <Label>Sign in</Label>
-        <div style={{ display: "flex", gap: 6 }}>
-          <Pill on={mode === "password"} onClick={() => { setMode("password"); setState("idle"); }}>Password</Pill>
-          <Pill on={mode === "link"} onClick={() => { setMode("link"); setState("idle"); }}>Email link</Pill>
-        </div>
-      </div>
-      {state === "sent" ? (
-        <span style={{ fontSize: 16, lineHeight: 1.5, color: C.mid }}>Check your inbox. We sent a sign-in link to <b style={{ color: C.ink }}>{email}</b>. Open it on this device.</span>
-      ) : (
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <span style={{ fontSize: 15, lineHeight: 1.5, color: C.mid }}>
-            {mode === "password" ? "Use the password you set from the dashboard menu." : "You will get a one-time link by email. The free mail sender allows only a few per hour, so prefer a password once you have set one."}
-          </span>
-          <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
-          {mode === "password" ? <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="adm-in" style={input} /> : null}
-          <button type="submit" disabled={state === "sending"} style={btn}>{state === "sending" ? "Signing in…" : mode === "password" ? "Sign in" : "Send sign-in link"}</button>
-          {state === "error" ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err}</span> : null}
-        </form>
-      )}
+      <Label>Sign in</Label>
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@trikhya.ai" className="adm-in" style={input} />
+        <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="adm-in" style={input} />
+        <button type="submit" disabled={busy} style={btn}>{busy ? "Signing in…" : "Sign in"}</button>
+        {err ? <span style={{ fontSize: 13, lineHeight: 1.5, color: C.amber }}>{err}</span> : null}
+      </form>
     </Panel>
   );
 }
