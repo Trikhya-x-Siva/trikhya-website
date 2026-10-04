@@ -37,8 +37,8 @@ export function HomePage() {
 </div>
 <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,.25)", background: "#13628F", overflow: "hidden" }}>
 <div data-ticker="1" style={{ display: "flex", width: "max-content", gap: "56px", padding: "18px 0", fontFamily: "'JetBrains Mono',monospace", fontSize: "14px", letterSpacing: ".12em", whiteSpace: "nowrap", color: "#d9eefb" }}>
-<span>ERP</span><span>◆</span><span>CRM</span><span>◆</span><span>DOCUMENTS</span><span>◆</span><span>DATA WAREHOUSES</span><span>◆</span><span>SUPPORT DESKS</span><span>◆</span><span>FINANCE</span><span>◆</span><span>OPERATIONS</span><span>◆</span><span>SPREADSHEETS</span><span>◆</span><span>APIS</span><span>◆</span>
-<span>ERP</span><span>◆</span><span>CRM</span><span>◆</span><span>DOCUMENTS</span><span>◆</span><span>DATA WAREHOUSES</span><span>◆</span><span>SUPPORT DESKS</span><span>◆</span><span>FINANCE</span><span>◆</span><span>OPERATIONS</span><span>◆</span><span>SPREADSHEETS</span><span>◆</span><span>APIS</span><span>◆</span>
+<span>ERP</span><span>◆</span><span>WAREHOUSE SYSTEMS</span><span>◆</span><span>ORDER MANAGEMENT</span><span>◆</span><span>SQL DATABASES</span><span>◆</span><span>DATA WAREHOUSES</span><span>◆</span><span>NATURAL LANGUAGE QUERY</span><span>◆</span><span>VALIDATED ANSWERS</span><span>◆</span><span>WHATSAPP ALERTS</span><span>◆</span><span>VOICE · TAMIL · HINDI · ENGLISH</span><span>◆</span><span>DASHBOARDS</span><span>◆</span>
+<span>ERP</span><span>◆</span><span>WAREHOUSE SYSTEMS</span><span>◆</span><span>ORDER MANAGEMENT</span><span>◆</span><span>SQL DATABASES</span><span>◆</span><span>DATA WAREHOUSES</span><span>◆</span><span>NATURAL LANGUAGE QUERY</span><span>◆</span><span>VALIDATED ANSWERS</span><span>◆</span><span>WHATSAPP ALERTS</span><span>◆</span><span>VOICE · TAMIL · HINDI · ENGLISH</span><span>◆</span><span>DASHBOARDS</span><span>◆</span>
 </div>
 </div>
 </section>

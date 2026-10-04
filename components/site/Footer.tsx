@@ -1,3 +1,5 @@
+"use client";
+
 import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 
@@ -25,7 +27,12 @@ export function Footer() {
           </div>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", gap: 16, fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#6f7986" }}>
-          <span>© 2026 Trikhya Intelligence Foundry</span><span>Privacy · Terms</span>
+          <span>© 2026 Trikhya Intelligence Foundry</span>
+          <span style={{ display: "flex", gap: 18 }}>
+            <a href={withBase("/privacy/")} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Privacy</a>
+            <a href={withBase("/terms/")} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Terms</a>
+            <a href={withBase("/privacy/#cookies")} onClick={(e) => { e.preventDefault(); dispatchEvent(new Event("trikhya:cookies")); }} data-hover="color:#4FB8EE;" style={{ color: "inherit" }}>Cookies</a>
+          </span>
         </div>
       </div>
     </footer>

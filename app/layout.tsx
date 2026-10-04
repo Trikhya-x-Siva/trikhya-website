@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { MotionRoot } from "@/components/site/MotionRoot";
+import { CookieBanner } from "@/components/site/CookieBanner";
 import { withBase } from "@/lib/paths";
 import "./globals.css";
 
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <Footer />
         <MotionRoot />
+        <CookieBanner />
       </body>
     </html>
   );
