@@ -155,22 +155,22 @@ export function HomePage() {
 </div>
 </section>
 
-<section id="about" style={{ background: "#0E1116", color: "#ffffff" }}>
-<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "56px" }}>
+<section id="about" style={{ background: "#F4F6F8", color: "#0E1116" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(80px,11vw,140px)", display: "flex", flexDirection: "column", gap: "56px" }}>
 <div data-reveal="1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "48px", alignItems: "end" }}>
 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>THE FOUNDRY</span>
+<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>THE FOUNDRY</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Engineers who ship, in a field full of demos.</h2>
 </div>
-<div style={{ display: "flex", flexDirection: "column", gap: "24px" }}><p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf" }}>Trikhya means three. Three facets in our mark, three steps in every build: a person, the intelligence, a person again.</p>
-<a href={withBase("/about/")} style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">Read our story →</a></div>
+<div style={{ display: "flex", flexDirection: "column", gap: "24px" }}><p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#3b4350" }}>Trikhya means three. Three facets in our mark, three steps in every build: a person, the intelligence, a person again.</p>
+<a href={withBase("/about/")} style={{ fontWeight: "700", fontSize: "17px", color: "#1670A6", borderBottom: "2px solid #1670A6", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#0F4A70;border-bottom-color:#0F4A70;">Read our story →</a></div>
 </div>
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: "40px" }}>
 {offerings.map((o, i) => (<Fragment key={i}>
-<div data-reveal="1" data-tilt="1" style={{ borderTop: "2px solid #4FB8EE", paddingTop: "28px", display: "flex", flexDirection: "column", gap: "16px" }}>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".12em", color: "#8a94a1" }}>{o.n}</span>
+<div data-reveal="1" data-tilt="1" style={{ borderTop: "2px solid #1670A6", paddingTop: "28px", display: "flex", flexDirection: "column", gap: "16px" }}>
+<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".12em", color: "#5b6370" }}>{o.n}</span>
 <span style={{ fontSize: "26px", fontWeight: "700", letterSpacing: "-.015em", lineHeight: "1.15" }}>{o.title}</span>
-<span style={{ fontSize: "17px", lineHeight: "1.55", color: "#aab3bf" }}>{o.body}</span>
+<span style={{ fontSize: "17px", lineHeight: "1.55", color: "#3b4350" }}>{o.body}</span>
 </div>
 </Fragment>))}
 </div>

@@ -98,6 +98,8 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     $("[data-g-btn]").onclick = () => setOpen(!open); $("[data-g-close]").onclick = () => setOpen(false);
     ($("[data-g-form]") as HTMLFormElement).onsubmit = (e) => { e.preventDefault(); ask(input.value); };
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && open) setOpen(false); });
+    const mark = $("[data-g-btn] img");
+    if (mark && !reduce) mark.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: 12000, iterations: Infinity, easing: "linear" });
     if (!reduce) $("[data-g-btn]").animate([{ opacity: 0, transform: "translateY(20px)" }, { opacity: 1, transform: "none" }], { duration: 600, delay: 1200, easing: "cubic-bezier(.2,.7,.2,1)", fill: "backwards" });
   };
   mount();

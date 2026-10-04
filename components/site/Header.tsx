@@ -6,11 +6,14 @@ import { MARK_WHITE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 
 const LINKS = [
+  { href: "/services/", label: "Services" },
   { href: "/solutions/", label: "Solutions" },
   { href: "/about/", label: "About" },
   { href: "/insights/", label: "Insights" },
   { href: "/careers/", label: "Careers" },
 ];
+
+const E = "cubic-bezier(.2,.7,.2,1)";
 
 export function Header() {
   const pathname = (usePathname() || "/").replace(/\/?$/, "/");
@@ -29,6 +32,8 @@ export function Header() {
 
   const open = menuOpen && !wide;
   const active = (href: string) => pathname === href;
+  // Links stay out of the way over the hero and slide in from the right once the visitor scrolls.
+  const showLinks = scrolled || pathname !== "/";
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 50, background: open ? "#0E1116" : scrolled ? "rgba(14,17,22,.92)" : "rgba(22,112,166,0)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", transition: "background .3s", borderBottom: `1px solid ${scrolled ? "rgba(255,255,255,.08)" : "rgba(255,255,255,0)"}` }}>
@@ -37,12 +42,27 @@ export function Header() {
           <img src={MARK_WHITE} alt="" style={{ width: "clamp(26px,7vw,34px)", height: "auto", flex: "none" }} />
           <span style={{ fontWeight: 900, fontSize: "clamp(12px,3.4vw,17px)", letterSpacing: ".12em", whiteSpace: "nowrap" }}>TRIKHYA <span style={{ color: "#BFE6FA" }}>INTELLIGENCE FOUNDRY</span></span>
         </a>
-        <nav style={{ display: wide ? "flex" : "none", flexWrap: "nowrap", gap: 28, fontSize: 15, fontWeight: 500, whiteSpace: "nowrap" }}>
-          {LINKS.map((l) => (
-            <a key={l.href} href={withBase(l.href)} style={active(l.href) ? { color: "#BFE6FA", borderBottom: "2px solid #BFE6FA", paddingBottom: 4 } : undefined}>{l.label}</a>
-          ))}
-        </nav>
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 28, marginLeft: "auto" }}>
+          <nav aria-label="Primary" style={{ display: wide ? "flex" : "none", flexWrap: "nowrap", gap: 28, fontSize: 15, fontWeight: 500, whiteSpace: "nowrap" }}>
+            {LINKS.map((l, i) => (
+              <a
+                key={l.href}
+                href={withBase(l.href)}
+                tabIndex={showLinks ? 0 : -1}
+                aria-hidden={!showLinks}
+                style={{
+                  opacity: showLinks ? 1 : 0,
+                  transform: showLinks ? "none" : "translateX(24px)",
+                  pointerEvents: showLinks ? "auto" : "none",
+                  transition: `opacity .45s ${E} ${showLinks ? (LINKS.length - 1 - i) * 60 : 0}ms, transform .45s ${E} ${showLinks ? (LINKS.length - 1 - i) * 60 : 0}ms`,
+                  ...(active(l.href) ? { color: "#BFE6FA", borderBottom: "2px solid #BFE6FA", paddingBottom: 4 } : {}),
+                }}
+              >
+                {l.label}
+              </a>
+            ))}
+          </nav>
           <a href={withBase("/contact/")} data-magnet="1" data-hide-sm="1" data-hover="background:#BFE6FA;color:#0F4A70;" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: 700, fontSize: 15, padding: "11px 22px", borderRadius: 999, whiteSpace: "nowrap" }}>Contact us</a>
           <button type="button" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu" style={{ display: wide ? "none" : "flex", width: 44, height: 44, borderRadius: "50%", border: "1.5px solid rgba(255,255,255,.6)", background: "transparent", color: "#ffffff", fontSize: 18, cursor: "pointer", alignItems: "center", justifyContent: "center" }}>{open ? "✕" : "≡"}</button>
         </div>
