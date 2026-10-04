@@ -14,7 +14,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
   const reduce = window.__trikhyaReduce ?? false;
   const KB: [RegExp, string][] = [
     [/service|offer|do you do|help/i, "We take AI from first idea to everyday use: strategy and discovery, data and systems integration, custom assistants and agents, and deployment with ongoing support."],
-    [/solution|built|example|case/i, "We've built ask-your-business analytics, document and knowledge assistants, multi-step workflow agents and customer-facing assistants. Client names stay private."],
+    [/solution|built|example|case/i, "Our first solution in production is a Natural Language Query Assistant: plant staff ask questions about orders, materials and finance in plain words and get a checked, sourced answer in seconds. Client names stay private."],
     [/long|time|week|month|timeline/i, "Typically 2 weeks to discover, about 4 more to a working prototype, and around 3 months to deploy across the organisation."],
     [/h-?ai-?h|human|b-?ai/i, "Human, AI, Human: people set the intent, we engineer the intelligence, and people act on the result. B-AI-B serves your teams; B-AI-C serves your customers."],
     [/data|secur|privacy|safe/i, "Systems run in your environment or a private cloud and follow your existing access rules. People keep the final say."],
@@ -45,7 +45,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
   </form>
 </div>
 <button data-g-btn aria-label="Chat with Godseye" style="display:flex;align-items:center;gap:10px;height:56px;padding:0 20px 0 8px;border-radius:999px;border:none;background:${L};color:${INK};font:800 16px ${F};cursor:pointer;box-shadow:0 14px 40px rgba(0,0,0,.35);">
-  <span style="width:40px;height:40px;border-radius:50%;background:${INK};display:flex;align-items:center;justify-content:center;"><img src="${markBlue}" alt="" style="width:22px;"></span>
+  <span style="width:40px;height:40px;border-radius:50%;background:${INK};display:flex;align-items:center;justify-content:center;"><img src="${markBlue}" alt="" style="width:22px;height:22px;object-fit:contain;transform-origin:49.5% 61.6%;"></span>
   <span data-g-lbl>Ask Godseye</span>
 </button>`;
     document.body.appendChild(root);

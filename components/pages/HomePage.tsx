@@ -1,8 +1,9 @@
 "use client";
 
 import { Fragment, useRef } from "react";
-import { usePageMotion, useTyped } from "@/lib/page-motion";
+import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
+import { FeaturedSolution } from "@/components/solutions/FeaturedSolution";
 import { withBase } from "@/lib/paths";
 const services = [
   { n: "01", title: "AI strategy & discovery", body: "We find the decisions where AI pays back first, and define how success will be measured." },
@@ -28,7 +29,6 @@ const posts = allPosts.slice(0, 3);
 export function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
   usePageMotion(rootRef);
-  const { typed, ansOpacity, ansShift } = useTyped("Which orders are going to be late this week?");
   return (
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section id="top" style={{ position: "relative", zIndex: "0", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
@@ -126,37 +126,15 @@ export function HomePage() {
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "860px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>SOLUTIONS</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", textWrap: "balance" }}>What we’ve already built.</h2>
-<p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "640px" }}>Each solution is shaped around one client, then generalised into a pattern we can bring to the next. Client names stay private.</p>
+<p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "640px" }}>Built for one client, in production today, and generalised into a pattern we can bring to the next. Client names stay private.</p>
 </div>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,480px),1fr))", gap: "56px", alignItems: "center" }}>
-<div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-<span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".12em", color: "#8a94a1" }}>01 · B-AI-B</span>
-<span style={{ fontSize: "clamp(28px,2.6vw,38px)", fontWeight: "800", letterSpacing: "-.02em", lineHeight: "1.1" }}>Ask-your-business analytics</span>
-<span style={{ fontSize: "18px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "520px" }}>Managers ask questions in everyday language and get precise answers drawn from the company’s own systems, with the source records shown alongside.</span>
-</div>
-<div data-reveal="1" data-wipe="1" style={{ background: "#161a21", border: "1px solid #2a313c", boxShadow: "0 40px 90px rgba(0,0,0,.5)", display: "flex", flexDirection: "column" }}>
-<div style={{ display: "flex", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #2a313c", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#7d8794" }}><span>analytics-assistant</span><span style={{ color: "#5fd39a" }}>● systems connected</span></div>
-<div style={{ padding: "clamp(18px,4vw,28px) clamp(14px,4vw,24px)", display: "flex", flexDirection: "column", gap: "22px", minHeight: "360px" }}>
-<div style={{ alignSelf: "flex-end", background: "#232a34", padding: "14px 18px", fontSize: "17px", maxWidth: "88%", minHeight: "24px" }}><span>{typed}</span><span style={{ display: "inline-block", width: "2px", height: "18px", background: "#4FB8EE", marginLeft: "2px", verticalAlign: "-3px", animation: "blink 1s steps(1) infinite" }}></span></div>
-<div style={{ display: "flex", flexDirection: "column", gap: "14px", opacity: `${ansOpacity}`, transform: `translateY(${ansShift}px)`, transition: "opacity .5s,transform .5s" }}>
-<div style={{ fontSize: "16px", lineHeight: "1.5", color: "#dde2e8" }}><b style={{ color: "#4FB8EE" }}>3 orders</b> are at risk this week. All three depend on the same delayed input.</div>
-<div style={{ border: "1px solid #2a313c", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px" }}>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#7d8794", borderBottom: "1px solid #2a313c" }}><span>ORDER</span><span>CUSTOMER</span><span>DUE</span><span>SLIP</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48213</span><span>Customer A</span><span>Thu</span><span style={{ color: "#f0a35e" }}>+2d</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8", borderBottom: "1px solid #222831" }}><span>SO-48230</span><span>Customer B</span><span>Fri</span><span style={{ color: "#f0a35e" }}>+1d</span></div>
-<div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr .7fr .6fr", gap: "6px", padding: "10px clamp(8px,3vw,14px)", color: "#dde2e8" }}><span>SO-48251</span><span>Customer C</span><span>Fri</span><span style={{ color: "#ef6b6b" }}>+4d</span></div>
-</div>
-<div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", color: "#7d8794" }}>SOURCES · orders, schedules · 1.8s</div>
-</div>
-</div>
-</div>
-</div>
+<FeaturedSolution />
 <div data-reveal="1"><a href={withBase("/solutions/")} style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">See all solutions →</a></div>
 </div>
 </section>
 
 <section id="about" style={{ background: "#F4F6F8", color: "#0E1116" }}>
-<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(80px,11vw,140px)", display: "flex", flexDirection: "column", gap: "56px" }}>
+<div style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(48px,6vw,88px) clamp(20px,5vw,40px) clamp(56px,7vw,96px)", display: "flex", flexDirection: "column", gap: "56px" }}>
 <div data-reveal="1" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))", gap: "48px", alignItems: "end" }}>
 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>THE FOUNDRY</span>
@@ -177,7 +155,7 @@ export function HomePage() {
 </div>
 </section>
 
-<section id="insights" style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(80px,11vw,140px) clamp(20px,5vw,40px)", display: "flex", flexDirection: "column", gap: "48px" }}>
+<section id="insights" style={{ maxWidth: "1360px", margin: "0 auto", padding: "clamp(40px,5vw,72px) clamp(20px,5vw,40px) clamp(80px,11vw,140px)", display: "flex", flexDirection: "column", gap: "48px" }}>
 <div data-reveal="1" style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "end", gap: "24px" }}>
 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#1670A6" }}>INSIGHTS</span>
