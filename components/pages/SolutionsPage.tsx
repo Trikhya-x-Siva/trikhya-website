@@ -36,7 +36,7 @@ export function SolutionsPage() {
 <div data-reveal="1" style={{ position: "relative", maxWidth: "1360px", margin: "0 auto", padding: "clamp(56px,7vw,88px) clamp(20px,5vw,40px)", display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: "40px" }}>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Want one of these, shaped to your business?</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
-<a href={withBase("/contact/")} data-magnet="1" style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Talk to us →</a>
+<a href={withBase("/contact/")} style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Talk to us →</a>
 <a href={withBase("/services/")} data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>Our services</a>
 </div>
 </div>

@@ -168,7 +168,7 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
               <span style={{ fontSize: 13, color: "#8a94a1" }}>You will hear back from us within a week, whatever the outcome.</span>
             </span>
           </div>
-          <a href={applyHref} data-track="job_apply" data-job={job.id} data-magnet="1" data-hover="background:#8fd3f7;" style={{ background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</a>
+          <a href={applyHref} data-track="job_apply" data-job={job.id} data-hover="background:#8fd3f7;" style={{ background: "#4FB8EE", color: "#0E1116", fontWeight: 700, fontSize: 16, padding: "14px 26px", borderRadius: 999 }}>Apply for this role →</a>
         </div>
       </div>
     </div>
