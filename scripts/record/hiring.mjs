@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { record, pause, click, zoomTo, zoomOut, wheel } from "./lib.mjs";
-import { BASE, API, ADMIN, SCRUB, HIDE, login, adminToken } from "./sm.mjs";
+import { BASE, API, ADMIN, SCRUB, HIDE, primeLogin, adminToken } from "./sm.mjs";
 
 const RESUMES = fs.readdirSync(path.resolve(".record-tmp/resumes")).filter((f) => f.endsWith(".pdf")).map((f) => path.resolve(".record-tmp/resumes", f));
 if (RESUMES.length === 0) throw new Error("no resumes: run make-resumes.mjs first");
@@ -46,17 +46,15 @@ const jobId = await freshJob();
 
 await record({
   name: "ai-hiring",
-  url: `${BASE}/login`,
+  url: `${BASE}/admin/jobs`,
+  prepare: (page) => primeLogin(page, ADMIN), // signed in before the first frame: no login screen on film
   scrub: SCRUB,
   hideSelector: HIDE,
   narration: Object.values(V),
   run: async (page, say) => {
     const speak = say, settle = say.settle;
 
-    await login(page, ADMIN);
-
     // The job and its criteria
-    await page.goto(`${BASE}/admin/jobs`, { waitUntil: "load" });
     await speak(V.job);
     await page.waitForSelector("tr", { timeout: 60_000 });
     await pause(page, 1200);
@@ -79,11 +77,19 @@ await record({
 
     // Screen them all
     await speak(V.screen);
-    await click(page, page.locator("button", { hasText: "Run AI Screener" }).first());
-    await say.skipWhile(() => page.waitForFunction(() => {
+    // The model call behind the screener can fail for a resume now and then; the button then reads
+    // "Run AI Screener (n)" again. Click until every resume is screened ("Re-screen All").
+    const screenerDone = () => page.waitForFunction(() => {
       const b = [...document.querySelectorAll("button")].find((x) => /Screening…|Run AI Screener|Re-screen All/.test(x.textContent ?? ""));
-      return b && /Re-screen All/.test(b.textContent ?? "");
-    }, null, { timeout: 300_000 }));
+      return b && !/Screening…/.test(b.textContent ?? "");
+    }, null, { timeout: 300_000 });
+    for (let i = 0; i < 3; i++) {
+      await click(page, page.locator("button", { hasText: /Run AI Screener/ }).first());
+      await say.skipWhile(screenerDone);
+      if (await page.locator("button", { hasText: "Re-screen All" }).count()) break;
+      console.log(`screener left resumes unscreened (attempt ${i + 1}); clicking again`);
+      await pause(page, 1500);
+    }
     await speak(V.scored);
     await zoomTo(page, page.locator("tbody tr").first(), 1.4);
     await settle(800);

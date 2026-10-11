@@ -18,6 +18,29 @@ export const SCRUB = [
 ];
 export const HIDE = 'img[alt*="minda" i], img[src*="minda" i], img[alt*="logo" i]';
 
+/** Sign in over the API and hand the session to the app through its localStorage keys (sm_token / sm_user). */
+async function session(page, creds) {
+  const r = await page.request.post(`${API}/api/auth/login`, { data: creds });
+  if (!r.ok()) throw new Error(`login failed: ${r.status()}`);
+  const { token, user } = await r.json();
+  return [token, JSON.stringify(user)];
+}
+
+/** Before the first page: the next navigation already carries the session, so no login screen is ever on film. */
+export async function primeLogin(page, creds) {
+  const s = await session(page, creds);
+  // Runs on every navigation: only seed an empty store, so a later switchUser() is not undone.
+  await page.context().addInitScript(([t, u]) => { if (!localStorage.getItem("sm_token")) { localStorage.setItem("sm_token", t); localStorage.setItem("sm_user", u); } }, s);
+}
+
+/** Mid-recording: become another user and land on their home page, again without the login screen. */
+export async function switchUser(page, creds, home) {
+  const s = await session(page, creds);
+  await page.evaluate(([t, u]) => { localStorage.setItem("sm_token", t); localStorage.setItem("sm_user", u); }, s);
+  await page.goto(`${BASE}${home}`, { waitUntil: "load" });
+}
+
+// Kept for scenarios that still want the UI sign-in behind a slate.
 export async function login(page, { email, password }) {
   if (!page.url().includes("/login")) {
     await page.evaluate(() => localStorage.clear());

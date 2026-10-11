@@ -88,7 +88,7 @@ body{transition:transform .9s cubic-bezier(.2,.7,.2,1)}`;
   document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();
 }
 
-export async function record({ name, url, scrub, hideSelector, narration = [], run, viewport = VIEWPORT, outDir = "public/videos", captionPos = "bottom:36px" }) {
+export async function record({ name, url, scrub, hideSelector, narration = [], prepare, run, viewport = VIEWPORT, outDir = "public/videos", captionPos = "bottom:36px" }) {
   const tmp = path.resolve(".record-tmp", name);
   fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
   fs.mkdirSync(path.resolve(outDir), { recursive: true });
@@ -110,6 +110,8 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
   /** Show a caption and queue its voice line. Returns how long the line takes to say, so the scenario can dwell. */
   const say = async (text) => {
     const v = voice.get(text) ?? (voice.set(text, await tts(text)), voice.get(text));
+    // Never talk over the previous line: wait for it to finish, plus a short breath.
+    const left = say.voiceEnd - Date.now(); if (left > 0) await page.waitForTimeout(left + 350);
     spoken.push({ at: Date.now() - t0 + VOICE_LEAD_MS, ...v });
     await page.evaluate((t) => window.__overlay?.caption(t), text);
     say.voiceEnd = Date.now() + v.ms;
@@ -125,6 +127,15 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
   /** Run a long wait (model call, upload) and cut most of it from the final video: the first `keepMs` after the
    *  narration ends stays on screen, then the clip jumps to the moment the wait finished. */
   const cuts = []; // [from, to] in ms on the voice clock
+  /** Milliseconds on the video clock, for say.cut(). */
+  say.now = () => Date.now() - t0 + VOICE_LEAD_MS;
+  /** Remove a stretch outright, e.g. a failed attempt the viewer should never see. */
+  say.cut = (from, to) => {
+    if (to - from <= 200) return;
+    cuts.push([from, to]);
+    // Lines spoken inside the removed stretch go with it.
+    for (let i = spoken.length - 1; i >= 0; i--) if (spoken[i].at >= from && spoken[i].at < to) spoken.splice(i, 1);
+  };
   say.skipWhile = async (fn, keepMs = 1200) => {
     const start = Date.now();
     await fn();
@@ -135,7 +146,10 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
 
   let failure;
   try {
+    // Sign in over the API here, before the first page is shown, so no login screen is ever on film.
+    if (prepare) await prepare(page);
     await page.goto(url, { waitUntil: "load" });
+    say.cut(0, say.now()); // the opening load: the viewer should start on content
     await run(page, say);
     await page.waitForTimeout(1800);
   } catch (e) {
@@ -151,8 +165,11 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
     // Drop the dead stretches with a short fade through black at every cut, then re-time every voice line
     // by the cut material before it.
     const FADE = 0.3;
+    // Cuts may overlap (a failed attempt wrapping a wait): sort and merge them first.
+    cuts.sort((p, q) => p[0] - q[0]);
+    for (let i = 1; i < cuts.length; i++) if (cuts[i][0] <= cuts[i - 1][1]) { cuts[i - 1][1] = Math.max(cuts[i - 1][1], cuts[i][1]); cuts.splice(i--, 1); }
     const segs = []; let from = 0;
-    for (const [a, b] of cuts) { segs.push([from / 1000, a / 1000]); from = b; }
+    for (const [a, b] of cuts) { if (a > from) segs.push([from / 1000, a / 1000]); from = Math.max(from, b); }
     segs.push([from / 1000, null]);
     const graph = segs.map(([s, e], i) => {
       const trim = e == null ? `trim=start=${s.toFixed(3)}` : `trim=start=${s.toFixed(3)}:end=${e.toFixed(3)}`;

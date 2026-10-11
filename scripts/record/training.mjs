@@ -3,7 +3,7 @@
 // node scripts/record/training.mjs
 import { spawnSync } from "node:child_process";
 import { record, pause, typeInto, click, zoomTo, zoomOut, wheel } from "./lib.mjs";
-import { BASE, LEARNER, ADMIN, SCRUB, HIDE, login } from "./sm.mjs";
+import { BASE, LEARNER, ADMIN, SCRUB, HIDE, primeLogin, switchUser } from "./sm.mjs";
 
 const QUESTION = "Who should do Kaizen on the shop floor?";
 const INPUT = 'input[placeholder="Ask a question about this module…"]';
@@ -22,7 +22,8 @@ spawnSync("docker", ["exec", "sparkminda-db", "psql", "-U", "sparkminda", "-q", 
 
 await record({
   name: "ai-training",
-  url: `${BASE}/login`,
+  url: `${BASE}/dashboard`,
+  prepare: (page) => primeLogin(page, LEARNER), // signed in before the first frame: no login screen on film
   scrub: SCRUB,
   hideSelector: HIDE,
   narration: Object.values(V),
@@ -30,7 +31,7 @@ await record({
     const speak = say, settle = say.settle;
 
     // Learner: dashboard
-    await login(page, LEARNER);
+    await page.waitForSelector("text=Overall Progress", { timeout: 60_000 });
     await speak(V.dashboard);
     await pause(page, 800);
     await zoomTo(page, "text=Overall Progress", 1.5);
@@ -65,7 +66,8 @@ await record({
     await say.clear();
 
     // Admin: compliance dashboard and course library
-    await login(page, ADMIN);
+    await say.skipWhile(() => switchUser(page, ADMIN, "/admin/dashboard"), 0);
+    await page.waitForSelector("text=Completion Rate", { timeout: 60_000 });
     await speak(V.admin);
     await pause(page, 800);
     await zoomTo(page, "text=Completion Rate", 1.5);
