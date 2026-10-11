@@ -10,7 +10,7 @@ import ffmpeg from "ffmpeg-static";
 import fs from "node:fs";
 import path from "node:path";
 
-const VIEWPORT = { width: 1280, height: 720 };
+const VIEWPORT = { width: 1920, height: 1080 }; // full HD frames; zooms carry the detail
 const SECRETS = path.resolve("supabase/.env.secrets"); // SARVAM_API_KEY lives here
 const VOICE_LEAD_MS = 350; // the video starts a beat before our clock
 
@@ -55,10 +55,11 @@ export function scrubScript({ rules, hideSelector }) {
  *  All three hang off <html>, not <body>, so zooming the body never moves them. Position and caption survive navigation. */
 function overlayScript({ captionPos }) {
   const css = `
-#__cur{position:fixed;left:0;top:0;width:22px;height:30px;z-index:2147483646;pointer-events:none;opacity:0;transition:opacity .3s;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
-.__rip{position:fixed;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid #4FB8EE;z-index:2147483645;pointer-events:none;animation:__rip .6s ease-out forwards}
+#__cur{position:fixed;left:0;top:0;width:32px;height:44px;z-index:2147483646;pointer-events:none;opacity:0;transition:opacity .3s;filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
+#__cur svg{width:32px;height:44px}
+.__rip{position:fixed;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:4px solid #4FB8EE;z-index:2147483645;pointer-events:none;animation:__rip .6s ease-out forwards}
 @keyframes __rip{from{transform:scale(.3);opacity:.95}to{transform:scale(1.5);opacity:0}}
-#__cap{position:fixed;left:50%;${captionPos};transform:translate(-50%,12px);max-width:70%;padding:12px 22px;border-radius:999px;background:rgba(14,17,22,.9);color:#fff;font:600 19px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;z-index:2147483646;pointer-events:none;opacity:0;transition:opacity .35s,transform .35s;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#__cap{position:fixed;left:50%;${captionPos};transform:translate(-50%,12px);max-width:64%;padding:16px 30px;border-radius:999px;background:rgba(14,17,22,.9);color:#fff;font:600 26px/1.3 system-ui,-apple-system,"Segoe UI",sans-serif;z-index:2147483646;pointer-events:none;opacity:0;transition:opacity .35s,transform .35s;text-align:center;box-shadow:0 12px 36px rgba(0,0,0,.35)}
 #__cap.on{opacity:1;transform:translate(-50%,0)}
 body{transition:transform .9s cubic-bezier(.2,.7,.2,1)}`;
   const start = () => {
@@ -144,10 +145,20 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
     if (!webm) { if (failure) throw failure; throw new Error("no video captured"); }
     const silent = path.join(tmp, "silent.mp4");
     const mp4 = path.resolve(outDir, `${name}.mp4`), poster = path.resolve(outDir, `${name}.jpg`);
-    // Drop the dead stretches, then re-time every voice line by the cut material before it.
-    const cutExpr = cuts.length ? `not(${cuts.map(([a, b]) => `between(t,${(a / 1000).toFixed(3)},${(b / 1000).toFixed(3)})`).join("+")})` : null;
-    const vf = cutExpr ? ["-vf", `select='${cutExpr}',setpts=N/FRAME_RATE/TB`, "-r", "25"] : [];
-    run_ffmpeg(["-y", "-i", webm, ...vf, "-c:v", "libx264", "-preset", "slow", "-crf", "24", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", silent]);
+    // Drop the dead stretches with a short fade through black at every cut, then re-time every voice line
+    // by the cut material before it.
+    const FADE = 0.3;
+    const segs = []; let from = 0;
+    for (const [a, b] of cuts) { segs.push([from / 1000, a / 1000]); from = b; }
+    segs.push([from / 1000, null]);
+    const graph = segs.map(([s, e], i) => {
+      const trim = e == null ? `trim=start=${s.toFixed(3)}` : `trim=start=${s.toFixed(3)}:end=${e.toFixed(3)}`;
+      const out = e == null ? "" : `,fade=t=out:st=${Math.max(0, e - s - FADE).toFixed(3)}:d=${FADE}`;
+      const inn = i === 0 ? "" : `,fade=t=in:st=0:d=${FADE}`;
+      return `[0:v]${trim},setpts=PTS-STARTPTS${inn}${out}[v${i}]`;
+    }).join(";") + `;${segs.map((_, i) => `[v${i}]`).join("")}concat=n=${segs.length}:v=1:a=0[v]`;
+    const vf = cuts.length ? ["-filter_complex", graph, "-map", "[v]", "-r", "30"] : ["-r", "30"];
+    run_ffmpeg(["-y", "-i", webm, ...vf, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", silent]);
     const removedBefore = (at) => cuts.reduce((sum, [a, b]) => sum + (b <= at ? b - a : a < at ? at - a : 0), 0);
     const timed = spoken.map((s) => ({ ...s, at: Math.max(0, s.at - removedBefore(s.at)) }));
     if (cuts.length) console.log(`${name}: cut ${(cuts.reduce((n, [a, b]) => n + b - a, 0) / 1000).toFixed(1)}s of waiting across ${cuts.length} stretch(es)`);
@@ -229,7 +240,7 @@ export async function click(page, target) {
   await page.waitForTimeout(220);
   await page.mouse.down(); await page.waitForTimeout(90); await page.mouse.up();
 }
-export async function typeInto(page, selector, text, delay = 45) {
+export async function typeInto(page, selector, text, delay = 32) {
   await click(page, selector);
   await page.locator(selector).first().pressSequentially(text, { delay });
 }

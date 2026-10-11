@@ -97,7 +97,9 @@ await record({
     }, 500);
     await pause(page, 600);
     await speak(V.drill);
-    await pause(page, 1500);
+    await zoomTo(page, "text=Overall match", 1.5);
+    await pause(page, 2500);
+    await zoomOut(page);
     await wheel(page, 700, 10, 110);
     await settle(600);
     await wheel(page, -700, 10, 70);

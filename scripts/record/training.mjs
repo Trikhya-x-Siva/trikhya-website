@@ -32,9 +32,12 @@ await record({
     // Learner: dashboard
     await login(page, LEARNER);
     await speak(V.dashboard);
-    await pause(page, 1500);
+    await pause(page, 800);
+    await zoomTo(page, "text=Overall Progress", 1.5);
+    await pause(page, 2200);
+    await zoomOut(page);
     await wheel(page, 500);
-    await pause(page, 1200);
+    await pause(page, 1000);
     await wheel(page, -500);
     await settle();
 
@@ -62,7 +65,10 @@ await record({
     // Admin: compliance dashboard and course library
     await login(page, ADMIN);
     await speak(V.admin);
-    await pause(page, 1200);
+    await pause(page, 800);
+    await zoomTo(page, "text=Completion Rate", 1.5);
+    await pause(page, 2200);
+    await zoomOut(page);
     await wheel(page, 600);
     await settle(600);
     await page.goto(`${BASE}/admin/courses`, { waitUntil: "load" });
