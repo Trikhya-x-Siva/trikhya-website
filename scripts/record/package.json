@@ -1,0 +1,10 @@
+{
+  "name": "trikhya-solution-recordings",
+  "private": true,
+  "description": "Tooling for recording the solution demo clips. Kept separate from the site so the website build never installs a browser or ffmpeg.",
+  "type": "module",
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright": "^1.58.2"
+  }
+}

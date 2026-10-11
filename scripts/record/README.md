@@ -5,10 +5,14 @@ plus a `.jpg` poster, which the site shows wherever that solution's `video` fiel
 Client and product names are rewritten on the fly and logos hidden, so nothing proprietary is on film.
 
 ```bash
+npm run record:setup      # once: installs Playwright, Chromium and ffmpeg into scripts/record/node_modules
 npm run record:nlq        # natural-language-query.mp4
 npm run record:training   # ai-training.mp4
 npm run record:hiring     # ai-hiring.mp4  (generates synthetic resumes first if missing)
 ```
+
+The recording tools live in their own package (`scripts/record/package.json`), deliberately outside the site's
+dependencies: ffmpeg-static downloads a binary at install time, which breaks the Vercel build.
 
 ## What has to be running
 
