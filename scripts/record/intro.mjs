@@ -14,6 +14,6 @@ for (const name of names) {
   const mp4 = path.resolve("public/videos", `${name}.mp4`), poster = path.resolve("public/videos", `${name}.jpg`);
   if (!fs.existsSync(mp4)) throw new Error(`missing ${mp4}`);
   await addIntro(mp4, card);
-  spawnSync(ffmpeg, ["-y", "-loglevel", "error", "-ss", "12", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster], { stdio: "inherit" });
+  spawnSync(ffmpeg, ["-y", "-loglevel", "error", "-ss", "1.6", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster], { stdio: "inherit" });
   console.log(`${name}: intro added (${(fs.statSync(mp4).size / 1e6).toFixed(1)} MB)`);
 }

@@ -184,7 +184,7 @@ export async function record({ name, url, scrub, hideSelector, narration = [], p
     if (cuts.length) console.log(`${name}: cut ${(cuts.reduce((n, [a, b]) => n + b - a, 0) / 1000).toFixed(1)}s of waiting across ${cuts.length} stretch(es)`);
     mixVoice(silent, timed, mp4);
     if (CARDS[name]) await addIntro(mp4, CARDS[name]); // branded title card up front
-    run_ffmpeg(["-y", "-ss", "12", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster]); // past the card and any opening load
+    run_ffmpeg(["-y", "-ss", "1.6", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster]); // the title card, so the poster matches the first frames
     fs.rmSync(tmp, { recursive: true, force: true });
     console.log(`\n${name}: ${mp4} (${(fs.statSync(mp4).size / 1e6).toFixed(1)} MB, ${spoken.length} voice lines), poster ${poster}`);
     if (failure) throw failure;
