@@ -47,6 +47,8 @@ await record({
       await page.waitForURL(/\/module\//, { timeout: 60_000 });
       await page.waitForSelector(INPUT, { timeout: 60_000 });
     }, 500);
+    // The player's own autoplay call can be refused; make sure the avatar video is running on film.
+    if (await page.evaluate(() => document.querySelector("video")?.paused ?? false)) await click(page, "video");
     await speak(V.module);
     await settle(400);
 

@@ -113,6 +113,9 @@ export async function record({ name, url, scrub, hideSelector, narration = [], r
     spoken.push({ at: Date.now() - t0 + VOICE_LEAD_MS, ...v });
     await page.evaluate((t) => window.__overlay?.caption(t), text);
     say.voiceEnd = Date.now() + v.ms;
+    // A caption describes the moment its line is spoken; hide it shortly after so it never lingers over the next step.
+    clearTimeout(say.timer);
+    say.timer = setTimeout(() => { page.evaluate(() => window.__overlay?.caption("")).catch(() => {}); }, v.ms + 700);
     return v.ms;
   };
   say.voiceEnd = 0;
@@ -249,26 +252,29 @@ export async function typeInto(page, selector, text, delay = 32) {
 export async function zoomTo(page, target, scale = 1.5) {
   const loc = typeof target === "string" ? page.locator(target).first() : target;
   // A missing zoom target must never sink a recording: just skip the zoom.
-  const ok = await loc.scrollIntoViewIfNeeded({ timeout: 5000 }).then(() => true, () => false);
-  if (!ok) return;
-  await page.evaluate(() => { document.body.style.transform = "none"; });
-  await page.waitForTimeout(60);
-  const box = await loc.boundingBox();
-  if (!box) return;
-  const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
-  await page.evaluate(([x, y, s]) => {
+  const zoomed = await page.evaluate(() => document.body.style.transform !== "" && document.body.style.transform !== "none");
+  if (!zoomed) { const ok = await loc.scrollIntoViewIfNeeded({ timeout: 5000 }).then(() => true, () => false); if (!ok) return; }
+  const handle = await loc.elementHandle({ timeout: 5000 }).catch(() => null);
+  if (!handle) return;
+  await handle.evaluate((el, s) => {
+    // Measure the target in unzoomed coordinates without a visible snap: kill the transition, drop the transform,
+    // measure, put the old transform back in the same frame, then animate to the new one.
+    const b = document.body, prev = b.style.transform;
+    b.style.transition = "none"; b.style.transform = "none";
+    const r = el.getBoundingClientRect();
+    b.style.transform = prev; void b.offsetHeight; b.style.transition = "";
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
     // Scale from the document origin and translate so the focus point lands at the viewport centre,
     // clamped so the page edges never show through.
     const W = innerWidth, H = innerHeight, sx = scrollX, sy = scrollY;
-    const bodyH = Math.max(document.body.scrollHeight, H), bodyW = Math.max(document.body.scrollWidth, W);
+    const bodyH = Math.max(b.scrollHeight, H), bodyW = Math.max(b.scrollWidth, W);
     const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
     const tx = clamp(W / 2 + sx - s * (x + sx), sx + W - s * bodyW, sx);
     const ty = clamp(H / 2 + sy - s * (y + sy), sy + H - s * bodyH, sy);
-    const b = document.body;
     b.style.transformOrigin = "0 0";
     b.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
     document.documentElement.style.overflow = "hidden";
-  }, [cx, cy, scale]);
+  }, scale);
   await page.waitForTimeout(950);
 }
 export async function zoomOut(page) {

@@ -27,7 +27,7 @@ const V = {
   upload: "Drop in a batch of resumes. Up to twenty-five PDFs at a time.",
   screen: "The screener reads each PDF into a structured profile, scores it with fixed weights, and writes three strengths and three gaps.",
   scored: "Every candidate now has a score out of one hundred, and a pass or fail on the hard requirements.",
-  drill: "Open the top candidate: the breakdown per criterion, the rationale, and the parsed profile beside the original PDF.",
+  drill: "Open the top candidate: the score, a bar per criterion showing what matched, the written strengths and gaps, and the profile the model read from the resume.",
   shortlist: "Shortlist. From here, the AI phone interviewer makes the first-round call.",
 };
 
@@ -97,12 +97,14 @@ await record({
     }, 500);
     await pause(page, 600);
     await speak(V.drill);
-    await zoomTo(page, "text=Overall match", 1.5);
-    await pause(page, 2500);
+    await zoomTo(page, "text=Overall match", 1.5);   // the score and the bar per criterion
+    await pause(page, 2600);
+    await zoomTo(page, "text=AI Summary", 1.4);      // the written strengths and gaps
+    await pause(page, 2600);
+    await zoomTo(page, "text=Candidate Profile", 1.4); // the parsed profile
+    await settle(800);
     await zoomOut(page);
-    await wheel(page, 700, 10, 110);
-    await settle(600);
-    await wheel(page, -700, 10, 70);
+    await page.locator("text=Overall match").first().scrollIntoViewIfNeeded().catch(() => {});
     await pause(page, 500);
     await speak(V.shortlist);
     await click(page, page.locator("button", { hasText: /^Shortlist$/ }).first());
