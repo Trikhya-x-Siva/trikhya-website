@@ -183,7 +183,8 @@ export async function record({ name, url, scrub, hideSelector, narration = [], p
     const timed = spoken.map((s) => ({ ...s, at: Math.max(0, s.at - removedBefore(s.at)) }));
     if (cuts.length) console.log(`${name}: cut ${(cuts.reduce((n, [a, b]) => n + b - a, 0) / 1000).toFixed(1)}s of waiting across ${cuts.length} stretch(es)`);
     mixVoice(silent, timed, mp4);
-    run_ffmpeg(["-y", "-ss", "12", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster]); // past the sign-in slate
+    if (CARDS[name]) await addIntro(mp4, CARDS[name]); // branded title card up front
+    run_ffmpeg(["-y", "-ss", "12", "-i", mp4, "-frames:v", "1", "-update", "1", "-q:v", "3", poster]); // past the card and any opening load
     fs.rmSync(tmp, { recursive: true, force: true });
     console.log(`\n${name}: ${mp4} (${(fs.statSync(mp4).size / 1e6).toFixed(1)} MB, ${spoken.length} voice lines), poster ${poster}`);
     if (failure) throw failure;
@@ -313,3 +314,61 @@ export function dotenv(file) {
 }
 
 export const pause = (page, ms) => page.waitForTimeout(ms);
+
+/* ───────────── Branded intro card ─────────────
+ * A 3-second title card in the site's palette, prepended to a finished clip: the white mark, the foundry name,
+ * the solution's tag line, title and tagline, fading in and out. Works on any existing MP4, so it can be added
+ * without re-recording. */
+const INTRO_SEC = 3.0;
+
+export const CARDS = {
+  "natural-language-query": { tag: "SOLUTION 01 · B-AI-B · IN PRODUCTION", title: "Natural Language Query Assistant", tagline: "Ask the business a question in plain words. Get a checked, sourced answer with a chart, in seconds." },
+  "ai-training": { tag: "SOLUTION 02 · B-AI-B · PROTOTYPE", title: "AI Induction Training Platform", tagline: "New joiners watch, ask and get tested in their own language. HR sees who has understood the material." },
+  "ai-hiring": { tag: "SOLUTION 03 · B-AI-B · PROTOTYPE", title: "AI Hiring Screener", tagline: "Write the criteria once. Drop in the resumes. Get a ranked, explained shortlist, then let the AI make the first call." },
+};
+
+async function renderCard({ tag, title, tagline }, png) {
+  // Inline the mark: a page built with setContent cannot load file:// images.
+  const mark = `data:image/png;base64,${fs.readFileSync(path.resolve("public/trikhya-mark-white.png")).toString("base64")}`;
+  const html = `<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1920px;height:1080px;background:#0E1116;color:#fff;font-family:'Hanken Grotesk',system-ui,sans-serif;overflow:hidden}
+  .wrap{position:absolute;inset:0;padding:120px 160px;display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;gap:22px;font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.22em;color:#aab3bf}
+  .top img{width:64px;height:64px}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:24px;letter-spacing:.2em;color:#4FB8EE;display:flex;align-items:center;gap:18px}
+  .tag:before{content:"";width:44px;height:2px;background:#4FB8EE}
+  h1{margin:26px 0 30px;font-size:118px;line-height:.98;font-weight:800;letter-spacing:-.045em;max-width:1500px}
+  p{margin:0;font-size:38px;line-height:1.4;color:#aab3bf;max-width:1200px;font-weight:500}
+  .foot{font-family:'JetBrains Mono',monospace;font-size:20px;letter-spacing:.18em;color:#5b6370}
+  .glow{position:absolute;right:-220px;top:-180px;width:900px;height:900px;border-radius:50%;background:radial-gradient(closest-side,rgba(22,112,166,.55),rgba(22,112,166,0))}
+  .mark{position:absolute;right:-6%;bottom:-18%;width:760px;opacity:.08}
+</style></head><body>
+<div class="glow"></div><img class="mark" src="${mark}">
+<div class="wrap">
+  <div class="top"><img src="${mark}"><span>TRIKHYA INTELLIGENCE FOUNDRY</span></div>
+  <div><div class="tag">${tag}</div><h1>${title}</h1><p>${tagline}</p></div>
+  <div class="foot">trikhya.ai</div>
+</div></body></html>`;
+  const b = await chromium.launch({ headless: true });
+  const p = await b.newPage({ viewport: VIEWPORT, deviceScaleFactor: 1 });
+  await p.setContent(html, { waitUntil: "load" });
+  await p.evaluate(() => document.fonts.ready).catch(() => {});
+  await p.waitForTimeout(500);
+  await p.screenshot({ path: png });
+  await b.close();
+}
+
+/** Prepend the branded card to an MP4 in place (video + silent audio for the card, then the clip). */
+export async function addIntro(mp4, card) {
+  const tmp = path.join(path.dirname(mp4), `.intro-${path.basename(mp4, ".mp4")}`);
+  fs.mkdirSync(tmp, { recursive: true });
+  const png = path.join(tmp, "card.png"), intro = path.join(tmp, "intro.mp4"), out = path.join(tmp, "out.mp4");
+  await renderCard(card, png);
+  run_ffmpeg(["-y", "-loop", "1", "-framerate", "30", "-t", String(INTRO_SEC), "-i", png, "-f", "lavfi", "-t", String(INTRO_SEC), "-i", "anullsrc=r=22050:cl=mono",
+    "-vf", `fade=t=in:st=0:d=0.5,fade=t=out:st=${(INTRO_SEC - 0.5).toFixed(2)}:d=0.5,format=yuv420p`, "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-c:a", "aac", "-b:a", "128k", "-shortest", intro]);
+  run_ffmpeg(["-y", "-i", intro, "-i", mp4, "-filter_complex", "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[v][a]", "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", out]);
+  fs.copyFileSync(out, mp4);
+  fs.rmSync(tmp, { recursive: true, force: true });
+}
