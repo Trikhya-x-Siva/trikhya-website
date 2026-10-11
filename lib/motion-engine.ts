@@ -239,7 +239,9 @@ export function initMotion({ markWhite, markBlue }: Opts) {
       document.addEventListener("click", (e) => {
         const t = e.target as Element | null;
         const a = t && t.closest && (t.closest("a[href]") as HTMLAnchorElement | null);
-        if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || a.target === "_blank") return;
+        // Runs in the capture phase, before React handlers can preventDefault, so controls that live inside a link
+        // (the video player on the solution cards) opt out with data-no-nav.
+        if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || a.target === "_blank" || t.closest("[data-no-nav]")) return;
         const href = a.getAttribute("href") || "";
         if (!href.startsWith("/") || href.startsWith("//")) return;
         const url = new URL(href, location.href);
