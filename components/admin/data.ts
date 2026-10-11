@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import { INSIGHTS } from "@/content/insights";
-import { NLQ } from "@/content/nlq";
+import { SOLUTIONS } from "@/content/solutions";
 
 export type Ev = {
   id: number; ts: string; session_id: string; visitor_id: string | null; name: string; path: string; title: string | null;
@@ -32,7 +32,7 @@ export function pageName(path: string) {
   const p = path.replace(/^\/trikhya-website/, "").replace(/\/+$/, "") || "/";
   const fixed: Record<string, string> = { "/": "Home", "/services": "Services", "/solutions": "Solutions", "/about": "About", "/insights": "Insights", "/careers": "Careers", "/contact": "Contact", "/privacy": "Privacy policy", "/terms": "Terms of use", "/admin": "Admin" };
   if (fixed[p]) return fixed[p];
-  if (p === NLQ.href.replace(/\/$/, "")) return `Solution · ${NLQ.title}`;
+  const sol = SOLUTIONS.find((s) => p === s.href.replace(/\/$/, "")); if (sol) return `Solution · ${sol.title}`;
   const ins = INSIGHTS.find((i) => p === `/insights/${i.slug}`); if (ins) return `Insight · ${ins.title}`;
   return p;
 }

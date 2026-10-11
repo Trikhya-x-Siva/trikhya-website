@@ -3,7 +3,10 @@
 import { Fragment, useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
-import { FeaturedSolution } from "@/components/solutions/FeaturedSolution";
+import { FeaturedSolution, QueryDemo, ScreenerDemo, TrainingDemo } from "@/components/solutions/FeaturedSolution";
+import { NLQ } from "@/content/nlq";
+import { TRAINING } from "@/content/training";
+import { HIRING } from "@/content/hiring";
 import { withBase } from "@/lib/paths";
 import { INSIGHTS } from "@/content/insights";
 import { InsightCard } from "@/components/insights/InsightCard";
@@ -119,9 +122,11 @@ export function HomePage() {
 <div data-reveal="1" style={{ display: "flex", flexDirection: "column", gap: "20px", maxWidth: "860px" }}>
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>SOLUTIONS</span>
 <h2 style={{ margin: "0", fontSize: "clamp(38px,4.6vw,68px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", textWrap: "balance" }}>What we’ve already built.</h2>
-<p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "640px" }}>Built for one client, in production today, and generalised into a pattern we can bring to the next. Client names stay private.</p>
+<p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "640px" }}>Three systems, each built for one client, from working prototype to production, and generalised into a pattern we can bring to the next. Client names stay private.</p>
 </div>
-<FeaturedSolution />
+<FeaturedSolution s={NLQ} demo={<QueryDemo />} />
+<FeaturedSolution s={TRAINING} demo={<TrainingDemo />} />
+<FeaturedSolution s={HIRING} demo={<ScreenerDemo />} />
 <div data-reveal="1"><a href={withBase("/solutions/")} style={{ fontWeight: "700", fontSize: "17px", color: "#4FB8EE", borderBottom: "2px solid #4FB8EE", paddingBottom: "4px", alignSelf: "flex-start" }} data-hover="color:#8fd3f7;border-bottom-color:#8fd3f7;">See all solutions →</a></div>
 </div>
 </section>

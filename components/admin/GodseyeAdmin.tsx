@@ -28,7 +28,7 @@ function topicOf(c: Conv): string {
   return "company";
 }
 
-/** Godseye management: what it knows, how it refuses, whether it is on, and every conversation it has had. */
+/** Ask Trikhya management: what it knows, how it refuses, whether it is on, and every conversation it has had. */
 export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
   const [s, setS] = useState<Settings | null>(null);
   const [dirty, setDirty] = useState(false);
@@ -67,7 +67,7 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <Pill onClick={onBack}>← Analytics</Pill>
-          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>Godseye management</span>
+          <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em" }}>Ask Trikhya management</span>
           {s ? <span style={{ fontFamily: MONO, fontSize: 11, color: s.enabled ? C.green : C.amber, border: `1px solid ${s.enabled ? C.green : C.amber}`, padding: "4px 10px", borderRadius: 999 }}>{s.enabled ? "LIVE · MODEL ANSWERS" : "OFF · FIXED ANSWERS"}</span> : null}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -104,15 +104,15 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           ) : null}
-          {!convs ? <Empty text="Loading…" /> : !convs.length ? <Empty text="No conversations yet. Switch Godseye on and ask it something on the site." /> : (
+          {!convs ? <Empty text="Loading…" /> : !convs.length ? <Empty text="No conversations yet. Switch Ask Trikhya on and ask it something on the site." /> : (
             <Table head={["Question", "Answer", "Topic", "When"]} rows={convs.map((c) => [`${c.flagged ? "⚑ " : ""}${c.question}`, c.answer.slice(0, 90) + (c.answer.length > 90 ? "…" : ""), TOPIC_LABEL[topicOf(c)] ?? topicOf(c), new Date(c.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })])} onRow={(i) => { setFlagging(convs[i]); setNote(convs[i].flag_note ?? ""); }} />
           )}
         </Panel>
       </>) : null}
 
       {tab === "Knowledge" && s ? (
-        <Panel title="What Godseye knows" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{s.knowledge.length.toLocaleString()} CHARACTERS</span>}>
-          <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>Plain text. Everything Godseye is allowed to say comes from here. Write facts, not marketing. Never include client names. When a flagged answer shows a gap, fix it here.</span>
+        <Panel title="What Ask Trikhya knows" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>{s.knowledge.length.toLocaleString()} CHARACTERS</span>}>
+          <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>Plain text. Everything Ask Trikhya is allowed to say comes from here. Write facts, not marketing. Never include client names. When a flagged answer shows a gap, fix it here.</span>
           <textarea rows={26} value={s.knowledge} onChange={(e) => set("knowledge", e.target.value)} className="adm-in" style={{ ...input, resize: "vertical", lineHeight: 1.55, fontFamily: MONO, fontSize: 13 }} />
         </Panel>
       ) : null}
@@ -167,7 +167,7 @@ export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
 
 type Doc = { id: string; title: string; kind: "pdf" | "text" | "markdown"; storage_path: string | null; chars: number; enabled: boolean; status: "pending" | "ready" | "failed"; error: string | null; created_at: string };
 
-/** Knowledge documents: PDFs, text or markdown that Godseye may quote facts from. */
+/** Knowledge documents: PDFs, text or markdown that Ask Trikhya may quote facts from. */
 function Documents() {
   const [docs, setDocs] = useState<Doc[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -190,7 +190,7 @@ function Documents() {
   };
   const toggle = async (d: Doc) => { await supabase()!.from("godseye_documents").update({ enabled: !d.enabled }).eq("id", d.id); load(); };
   const remove = async (d: Doc) => {
-    if (!confirm(`Remove “${d.title}” from Godseye's knowledge?`)) return;
+    if (!confirm(`Remove “${d.title}” from Ask Trikhya's knowledge?`)) return;
     const sb = supabase()!; if (d.storage_path) await sb.storage.from("godseye-docs").remove([d.storage_path]);
     await sb.from("godseye_documents").delete().eq("id", d.id); load();
   };
@@ -199,7 +199,7 @@ function Documents() {
   return (
     <div style={grid(420)}>
       <Panel title="Add a document">
-        <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>Upload a PDF, text or markdown file: a company deck, a service description, a case write-up without client names. The text is extracted once and given to Godseye as facts alongside the knowledge page. Up to about 40,000 characters are used per answer, newest documents first.</span>
+        <span style={{ fontSize: 14, lineHeight: 1.5, color: C.mid }}>Upload a PDF, text or markdown file: a company deck, a service description, a case write-up without client names. The text is extracted once and given to Ask Trikhya as facts alongside the knowledge page. Up to about 40,000 characters are used per answer, newest documents first.</span>
         <label style={{ ...input, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, cursor: busy ? "wait" : "pointer", borderStyle: "dashed" }}>
           <span style={{ color: C.dim }}>{busy ? "Working…" : "Choose a PDF, .txt or .md file…"}</span>
           <span style={{ fontFamily: MONO, fontSize: 12, color: C.sky }}>BROWSE</span>

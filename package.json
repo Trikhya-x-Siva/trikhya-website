@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "record:nlq": "node scripts/record/nlq.mjs",
+    "record:training": "node scripts/record/training.mjs",
+    "record:hiring": "node scripts/record/make-resumes.mjs \"D:/Work/Trikhya Internal/sparkminda-platform/backend\" && node scripts/record/hiring.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -25,6 +28,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
+    "ffmpeg-static": "^5.2.0",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

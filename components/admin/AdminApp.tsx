@@ -11,7 +11,7 @@ import { Bars, C, Chart, Empty, fmt, Kpi, Label, MONO, Panel, pct, Pill, SANS, s
 import { Hiring } from "./Hiring";
 import { GodseyeAdmin } from "./GodseyeAdmin";
 
-const TABS = ["Overview", "Pages", "Careers", "Godseye", "Audience", "Live", "Admins"] as const;
+const TABS = ["Overview", "Pages", "Careers", "Ask Trikhya", "Audience", "Live", "Admins"] as const;
 type Tab = (typeof TABS)[number];
 
 export function AdminApp() {
@@ -159,7 +159,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
             {tab === "Overview" ? <Overview a={agg} days={days} onPage={(p) => { setPagePick(p); setTab("Pages"); }} /> : null}
             {tab === "Pages" ? <Pages a={agg} pick={pagePick} setPick={setPagePick} /> : null}
             {tab === "Careers" ? <Careers a={agg} onManage={() => setManage("hiring")} /> : null}
-            {tab === "Godseye" ? <Godseye a={agg} onManage={() => setManage("godseye")} /> : null}
+            {tab === "Ask Trikhya" ? <Godseye a={agg} onManage={() => setManage("godseye")} /> : null}
             {tab === "Audience" ? <Audience a={agg} /> : null}
             {tab === "Live" ? <Live events={events!} /> : null}
             {tab === "Admins" ? <Admins me={email} /> : null}
@@ -181,7 +181,7 @@ function Overview({ a, days, onPage }: { a: Agg; days: number; onPage: (p: strin
         <Kpi label="Page views" value={fmt(a.views)} sub={`${(a.sessions ? a.views / a.sessions : 0).toFixed(1)} per session`} />
         <Kpi label="Avg time on page" value={secs(a.avgSeconds)} sub={`${Math.round(a.avgScroll)}% average scroll depth`} />
         <Kpi label="Bounce rate" value={pct(a.bounceRate)} sub="single-page sessions" accent={a.bounceRate > 0.7 ? C.amber : undefined} />
-        <Kpi label="Enquiries" value={fmt(a.contact)} sub={`${a.godseye.questions.length} Godseye questions`} accent={C.green} />
+        <Kpi label="Enquiries" value={fmt(a.contact)} sub={`${a.godseye.questions.length} Ask Trikhya questions`} accent={C.green} />
       </div>
       <Panel title="Views and sessions per day"><Chart series={a.series} /></Panel>
       <div style={grid(360)}>
@@ -245,8 +245,8 @@ function Godseye({ a, onManage }: { a: Agg; onManage: () => void }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <span style={{ fontSize: 14, color: C.mid }}>Usage of the assistant. Its knowledge, behaviour, on/off switch and full conversations live in Godseye management.</span>
-        <button type="button" onClick={onManage} style={{ font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" }}>Godseye management →</button>
+        <span style={{ fontSize: 14, color: C.mid }}>Usage of the assistant. Its knowledge, behaviour, on/off switch and full conversations live in Ask Trikhya management.</span>
+        <button type="button" onClick={onManage} style={{ font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" }}>Ask Trikhya management →</button>
       </div>
       <div style={grid(200)}>
         <Kpi label="Chat opened" value={fmt(a.godseye.opens)} />

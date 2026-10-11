@@ -27,7 +27,7 @@ export const PRIVACY: LegalDoc = {
       items: [
         "Contact form and email: your name, work email, company, and whatever you write in the message. We use it to answer your enquiry and, if you ask us to, to follow up about working together.",
         "Job applications: your name, contact details, CV and anything else you choose to send. We use it to assess your application for the role you applied to.",
-        "Godseye assistant: the questions you type into the on-page assistant are answered in your browser from a fixed set of responses. They are not sent to us or to any third party and are not stored after you close the page.",
+        "Ask Trikhya assistant: the questions you type into the on-page assistant are answered in your browser from a fixed set of responses. They are not sent to us or to any third party and are not stored after you close the page.",
         "Usage measurement: we record, ourselves, which pages are viewed, how long they are read, and which links and buttons are clicked. Each visit is identified only by a random id that lasts for the browser tab. We do not use Google Analytics or any advertising tracker, and nothing is shared with third parties.",
         "Technical data: our hosting provider records standard server logs (IP address, browser type, pages requested, time) to serve the site and keep it secure.",
       ],
@@ -125,7 +125,7 @@ export const TERMS: LegalDoc = {
       id: "content",
       title: "Our content",
       paras: [
-        "Everything on this site, including text, design, diagrams, logos and the Godseye assistant, belongs to Trikhya or is used with permission. You may read it, link to it and quote short extracts with attribution. You may not copy, republish or sell it without our written consent.",
+        "Everything on this site, including text, design, diagrams, logos and the Ask Trikhya assistant, belongs to Trikhya or is used with permission. You may read it, link to it and quote short extracts with attribution. You may not copy, republish or sell it without our written consent.",
         "Case studies and figures describe specific engagements at a specific time. They are not a promise of what any other system will achieve.",
       ],
     },
@@ -140,7 +140,7 @@ export const TERMS: LegalDoc = {
     },
     {
       id: "godseye",
-      title: "The Godseye assistant",
+      title: "The Ask Trikhya assistant",
       paras: ["The on-page assistant gives general information about Trikhya from a fixed set of answers. It is not advice and it does not form a contract. For anything that matters, write to us and a person will reply."],
     },
     {

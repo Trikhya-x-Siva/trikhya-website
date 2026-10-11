@@ -1,12 +1,15 @@
 /** Natural Language Query Assistant: the first solution in production.
  *  Public copy: no client, product or table names. The sector is allowed. */
 
-export const NLQ = {
+import type { Solution } from "./solutions";
+
+export const NLQ: Solution = {
   slug: "natural-language-query",
   href: "/solutions/natural-language-query/",
   tag: "01 · B-AI-B",
   status: "In production",
   title: "Natural Language Query Assistant",
+  heroTitle: ["Natural Language", "Query Assistant."],
   tagline: "Ask the business a question in plain words. Get a checked, sourced answer with a chart, in seconds.",
   summary:
     "Built for a multi-plant insole manufacturer. Plant staff ask about orders, materials and finance in English, Tamil or Hindi. The assistant writes a read-only query against a governed warehouse, has a second model check the result, and answers with its sources and a chart.",
@@ -16,6 +19,10 @@ export const NLQ = {
     { value: "3", label: "languages, by text and voice" },
     { value: "0", label: "write access: every query is read-only" },
   ],
+  built: {
+    lead: "Ask in plain words. Get the answer, the source and the chart.",
+    extra: "Follow-up questions keep the thread. A vague question gets a clarifying prompt instead of a confident wrong answer. Every answer shows the records it came from.",
+  },
   problem: {
     lead: "A multi-plant manufacturer could not get a straight answer out of its own data.",
     body:
@@ -58,13 +65,16 @@ export const NLQ = {
   },
   outcome: {
     lead: "What changed on the floor.",
+    headline: { value: "92.4%", body: "of questions answered correctly end to end, measured on real questions from the client’s own staff, re-run on every release." },
     points: [
       { title: "A sourced answer in seconds", body: "Plant heads open the day with a live picture of delivery and risk instead of a spreadsheet request." },
       { title: "The system says no", body: "When it cannot verify an answer it says so, rather than serving a plausible wrong one. That is why people trust the ones it does give." },
       { title: "Three languages, one pipeline", body: "Tamil, Hindi and English, by voice or text, on top of the same tested query path." },
     ],
   },
-  around: [
+  around: {
+    lead: "What else we built for the same floor.",
+    items: [
     { title: "Role dashboards", body: "Floor supervisors see today’s priorities and line output. Plant heads see delivery, money and risk. Country heads see every plant at once." },
     { title: "Proactive alerts on WhatsApp", body: "Overdue and at-risk orders, material shortages and pending approvals reach the right person with acknowledge and resolve actions in the message." },
     { title: "Order capture from email", body: "The orders mailbox is read continuously. Purchase orders that were emailed but never entered are flagged before they become late deliveries." },
@@ -72,5 +82,7 @@ export const NLQ = {
     { title: "Admin and governance console", body: "Users and roles, every conversation traced, feedback analytics, human-approved onboarding of new tables and example answers." },
     { title: "Regression harness", body: "A fixed question set runs on every release, and deployment refuses to ship if the catalogue or glossary falls below its minimum size." },
   ],
+  },
+  video: { src: "/videos/natural-language-query.mp4", poster: "/videos/natural-language-query.jpg" },
   stack: ["Claude", "PostgreSQL + pgvector", "FastAPI", "Next.js", "Vega-Lite", "Google Cloud Run", "Langfuse", "Twilio WhatsApp"],
 };

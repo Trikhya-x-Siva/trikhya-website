@@ -4,7 +4,7 @@ import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 import { usePathname } from "next/navigation";
 
-const SOCIAL = [["https://www.linkedin.com/company/trikhya-intelligence-foundry", "LinkedIn"], ["https://x.com/", "X"], ["https://github.com/", "GitHub"], ["https://www.youtube.com/", "YouTube"], ["https://www.instagram.com/", "Instagram"]];
+const SOCIAL = [["https://www.linkedin.com/company/trikhya-intelligence-foundry", "LinkedIn"]];
 
 export function Footer() {
   const adminPath = usePathname();
