@@ -18,7 +18,9 @@ export async function chat(provider: string, model: string, messages: Msg[], max
   }
   const key = Deno.env.get("SARVAM_API_KEY")?.trim(); if (!key) throw new Error("SARVAM_API_KEY is not set");
   // sarvam-m was retired in 2026; map old settings rows forward.
-  const m = model === "sarvam-m" || !model ? "sarvam-105b" : model;
+  // sarvam-105b reasons first and, since October 2026, often spends the whole budget on it and returns no content.
+  // The conversations variant answers directly, so legacy names map there.
+  const m = model === "sarvam-m" || model === "sarvam-105b" || !model ? "sarvam-105b-conversations" : model;
   const r = await fetch("https://api.sarvam.ai/v1/chat/completions", {
     method: "POST", headers: { "api-subscription-key": key, "content-type": "application/json" },
     // Sarvam's current models reason before answering; keep that short and leave room for the answer itself.
