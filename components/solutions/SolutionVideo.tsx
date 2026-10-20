@@ -23,7 +23,7 @@ const Icon = ({ d, fill }: { d: string; fill?: boolean }) => (
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
-/** Replaces the animated demo panel once a recording exists. Local files (public/videos/*.mp4) autoplay muted and loop
+/** Replaces the animated demo panel once a recording exists. Local files (public/videos/*.mp4) play muted and loop while on screen, pause when scrolled away,
  *  behind a control bar in the site's palette; a YouTube or Vimeo URL is embedded instead. Every control swallows its
  *  click, so the player also works inside the solution cards, which are links. */
 export function SolutionVideo({ video }: { video: VideoSpec }) {
@@ -37,10 +37,13 @@ export function SolutionVideo({ video }: { video: VideoSpec }) {
 function Player({ video }: { video: VideoSpec }) {
   const box = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
   const [t, setT] = useState(0);
   const [dur, setDur] = useState(0);
+
+  // Set when the visitor presses pause themselves; scrolling back into view then leaves it paused.
+  const userPaused = useRef(false);
 
   useEffect(() => {
     const v = ref.current; if (!v) return;
@@ -50,16 +53,30 @@ function Player({ video }: { video: VideoSpec }) {
     return () => { for (const ev of ["play", "pause", "volumechange", "timeupdate", "loadedmetadata", "durationchange"]) v.removeEventListener(ev, sync); };
   }, []);
 
+  // Plays only while at least half of the player is on screen; pauses the moment it scrolls away, so a page
+  // with several recordings never has more than one running and sound never carries on out of sight.
+  useEffect(() => {
+    const v = ref.current, el = box.current; if (!v || !el) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting && e.intersectionRatio >= 0.5) { if (!userPaused.current && v.paused) v.play().catch(() => undefined); }
+      else if (!v.paused) v.pause();
+    }, { threshold: [0, 0.5] });
+    io.observe(el);
+    const onHide = () => { if (document.visibilityState === "hidden" && !v.paused) v.pause(); };
+    document.addEventListener("visibilitychange", onHide);
+    return () => { io.disconnect(); document.removeEventListener("visibilitychange", onHide); };
+  }, []);
+
   // Inside a card the whole thing sits in an <a>: keep every click on the player from following the link.
   const stop = (e: MouseEvent) => { e.preventDefault(); e.stopPropagation(); };
-  const toggle = () => { const v = ref.current; if (!v) return; if (v.paused) void v.play(); else v.pause(); };
+  const toggle = () => { const v = ref.current; if (!v) return; if (v.paused) { userPaused.current = false; void v.play(); } else { userPaused.current = true; v.pause(); } };
   const sound = () => { const v = ref.current; if (!v) return; v.muted = !v.muted; if (!v.muted && v.paused) void v.play(); };
   const full = () => { const el = box.current; if (!el) return; if (document.fullscreenElement) void document.exitFullscreen(); else void el.requestFullscreen?.(); };
   const seek = (e: MouseEvent<HTMLDivElement>) => { const v = ref.current; if (!v || !dur) return; const r = e.currentTarget.getBoundingClientRect(); v.currentTime = ((e.clientX - r.left) / r.width) * dur; };
 
   return (
     <div ref={box} data-wipe="1" data-no-nav="" style={FRAME} onClick={stop}>
-      <video ref={ref} src={withBase(video.src)} poster={video.poster ? withBase(video.poster) : undefined} autoPlay muted loop playsInline preload="metadata"
+      <video ref={ref} src={withBase(video.src)} poster={video.poster ? withBase(video.poster) : undefined} muted loop playsInline preload="metadata"
         onClick={(e) => { stop(e); toggle(); }} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", cursor: "pointer", background: "#161a21" }}>
         {video.title ?? "Solution walkthrough"}
       </video>
