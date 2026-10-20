@@ -86,7 +86,7 @@ export function initAskTrikhya({ markWhite, markBlue }: Opts) {
       if (!reduce) b.querySelectorAll("span").forEach((d, i) => d.animate([{ opacity: 0.3 }, { opacity: 1 }, { opacity: 0.3 }], { duration: 900, delay: i * 150, iterations: Infinity }));
       return b;
     };
-    const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "Good question. A person from our team can answer that properly: write to connect@trikhya.ai and we'll reply within two working days."])[1] as string;
+    const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "That is outside what I cover. I only answer questions about Trikhya Intelligence Foundry. For anything else, write to connect@trikhya.ai."])[1] as string;
     const ask = async (q: string) => {
       if (!q.trim() || busy) return;
       track("assistant_question", { q: q.slice(0, 300) });
