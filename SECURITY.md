@@ -34,14 +34,14 @@ Admin status is decided by one function, `is_admin()`, which looks up the signed
 ## Server functions
 
 - `screen-application`: takes an application id, runs only on rows in `new` or `failed`, at most four attempts per application, and at most `SCREEN_DAILY_CAP` (default 100) automatic runs a day; beyond that, applications wait as `new` for an admin. Reads the resume with the service role and calls Claude. Provider error text is shown to admins only.
-- `ask-trikhya`: enforces the daily cap, the per-session turn limit and a per-network-address daily limit (a salted hash, never the address itself), treats the knowledge and documents as data, and asks the model for a strict JSON verdict so an out-of-scope question always gets the fixed refusal.
+- `ask-trikhya`: enforces the daily cap, the per-session turn limit and a per-network-address daily limit (a salted hash, never the address itself), rebuilds the conversation history from its own log rather than trusting turns sent by the browser, treats the knowledge and documents as data, and asks the model for a strict JSON verdict so an out-of-scope question always gets the fixed refusal.
 - `ingest-document`, `start-interview`, `invite-admin`: verify the caller's session token is an admin before doing anything. Re-running `screen-application` on anything but a fresh application also requires an admin.
 - There is no public sign-up. Admins are added by an existing admin generating a one-time invite link; the allow-list cannot be claimed from outside.
 - All functions reject requests whose `Origin` is missing or not on the allow-list. The default list is `https://trikhya.ai`, `https://www.trikhya.ai` and `http://localhost:3000`; set the `ALLOWED_ORIGINS` secret (comma-separated) to add the project's own `*.vercel.app` preview hostname. Never add a wildcard: anyone can deploy to `vercel.app`.
 
 ## Browser hardening
 
-- `vercel.json` sends the security headers: a Content-Security-Policy (scripts from the site only, styles from the site and Google Fonts, connections to Supabase, `frame-ancestors 'none'`), HSTS, `nosniff`, `X-Frame-Options`, a referrer policy and a permissions policy. `'unsafe-inline'` for scripts remains because a static Next.js export inlines its hydration data.
+- `vercel.json` sends the security headers: a Content-Security-Policy (scripts from the site only, styles from the site and Google Fonts, connections to this project's Supabase host only, `frame-ancestors 'none'`), HSTS, `nosniff`, `X-Frame-Options`, a referrer policy and a permissions policy. `'unsafe-inline'` for scripts remains because a static Next.js export inlines its hydration data.
 - The admin page is `noindex`, hidden from the site's header, footer and tracking.
 - The apply form carries a honeypot field; submissions that fill it are dropped client-side. Applications are only accepted against roles loaded from the database, never the built-in fallback list.
 - Analytics are anonymous by default; a returning-visitor id is set only after consent.
@@ -59,6 +59,12 @@ Admin status is decided by one function, `is_admin()`, which looks up the signed
 
 - Whatever is in the Ask Trikhya knowledge text and in enabled documents can be drawn out by any visitor through conversation. Upload only material that may be public.
 - A CV is read by a model. Text inside it can try to steer the summary; the score is computed mechanically from the extracted profile, and a person reads both.
+
+## Dependencies
+
+`npm audit` is clean for everything that ships to the browser. The remaining advisories are in the lint toolchain
+(`eslint-config-next` → `fast-glob` → `braces`), which never runs in production; npm's suggested "fix" is a downgrade
+to Next 14 and is not one. Re-run `npm audit --omit=dev` after upgrades.
 
 ## Known limits
 

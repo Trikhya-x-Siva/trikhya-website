@@ -19,6 +19,11 @@ input, textarea { cursor: url(../public/cursor-link.png) 2 2, text; }
 /* ───────────── Responsive layer ─────────────
  * The pages carry inline styles from the design export, so phone and tablet
  * rules target those declarations directly. Desktop is untouched. */
+/* Header: the primary links and the menu button swap on viewport width in CSS, so the first paint on a
+ * phone is already right. The React state only drives the open menu. */
+@media (max-width: 1179px) { .hdr-nav { display: none !important; } }
+@media (min-width: 1180px) { .hdr-menu { display: none !important; } }
+
 @media (max-width: 760px) {
   /* Fixed-column grids collapse to one column; wide two-pane layouts stack. */
   [style*="repeat(4,minmax(0,1fr))"], [style*="repeat(3,minmax(0,1fr))"],

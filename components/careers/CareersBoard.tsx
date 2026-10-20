@@ -74,8 +74,11 @@ export function CareersBoard() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+      {JOBS.length === 0 ? (
+        <p data-reveal="1" style={{ margin: 0, padding: "8px 0 24px", fontSize: 20, lineHeight: 1.55, color: "#aab3bf", maxWidth: 640 }}>There are no open roles right now. If you would like to work with us, write to <a href={`mailto:${APPLY_EMAIL}`} style={{ color: "#4FB8EE", borderBottom: "1px solid #4FB8EE" }}>{APPLY_EMAIL}</a> with a few lines about yourself.</p>
+      ) : null}
       {/* Filters and sort: one row */}
-      <div data-reveal="1" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "14px 22px", padding: "14px 18px", border: "1px solid #2a313c", background: "#161a21" }}>
+      <div data-reveal="1" style={{ display: JOBS.length === 0 ? "none" : "flex", flexWrap: "wrap", alignItems: "center", gap: "14px 22px", padding: "14px 18px", border: "1px solid #2a313c", background: "#161a21" }}>
         {field("ROLE", "role", roleOptions)}
         {field("TEAM", "team", teamOptions)}
         {field("LOCATION", "location", locationOptions)}
@@ -90,10 +93,10 @@ export function CareersBoard() {
       </div>
 
       {/* Results */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16, flexWrap: "wrap" }}>
+      <div style={{ display: JOBS.length === 0 ? "none" : "flex", justifyContent: "space-between", alignItems: "baseline", gap: 16, flexWrap: "wrap" }}>
         <span style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".12em", color: "#8a94a1" }}>{visible.length} {visible.length === 1 ? "OPENING" : "OPENINGS"}</span>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid #2a313c" }}>
+      <div style={{ display: JOBS.length === 0 ? "none" : "flex", flexDirection: "column", borderTop: "1px solid #2a313c" }}>
         {visible.map((r) => (
           <button key={r.id} type="button" onClick={() => open(openIds(r))} data-spot="1" data-hover="color:#4FB8EE;padding-left:12px;" style={{ cursor: "pointer", font: "inherit", textAlign: "left", background: "none", border: "none", borderBottom: "1px solid #2a313c", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, alignItems: "center", padding: "28px 0", color: "#ffffff", transition: "padding .25s, color .25s", width: "100%" }}>
             <span style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-.01em" }}>{r.title}</span>
