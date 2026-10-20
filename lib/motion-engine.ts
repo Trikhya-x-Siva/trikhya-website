@@ -175,7 +175,7 @@ export function initMotion({ markWhite, markBlue }: Opts) {
   let bar: HTMLElement | null = null, brand: HTMLElement | null = null, ticking = false, magnetsBound = false;
   const update = () => {
     ticking = false;
-    const vh = innerHeight, narrow = innerWidth < 900;
+    const vh = innerHeight;
     const doc = document.documentElement, max = doc.scrollHeight - vh;
     if (bar) bar.style.transform = `scaleX(${max > 0 ? scrollY / max : 0})`;
     if (brand) brand.style.transform = scrollY > 40 ? "scale(.9)" : "";

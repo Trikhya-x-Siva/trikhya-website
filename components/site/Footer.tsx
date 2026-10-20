@@ -3,8 +3,10 @@
 import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 import { usePathname } from "next/navigation";
+import { CONTACT_EMAIL, MAILTO } from "@/lib/contact";
+import { LINKEDIN_URL } from "@/lib/site";
 
-const SOCIAL = [["https://www.linkedin.com/company/trikhya-intelligence-foundry", "LinkedIn"]];
+const SOCIAL = [[LINKEDIN_URL, "LinkedIn"]];
 
 export function Footer() {
   const adminPath = usePathname();
@@ -22,6 +24,7 @@ function FooterInner() {
             <span style={{ fontWeight: 900, fontSize: 16, letterSpacing: ".14em" }}>TRIKHYA <span style={{ color: "#4FB8EE" }}>INTELLIGENCE FOUNDRY</span></span>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+            <a href={MAILTO} data-sweep="1" data-hover="border-color:#4FB8EE;" style={{ border: "1px solid #2a313c", padding: "10px 18px", borderRadius: 999, fontSize: 14, fontWeight: 600, color: "#d4dae2" }}>{CONTACT_EMAIL}</a>
             {SOCIAL.map(([href, label]) => (
               <a key={href} href={href} target="_blank" rel="noopener" data-sweep="1" data-hover="border-color:#4FB8EE;" style={{ border: "1px solid #2a313c", padding: "10px 18px", borderRadius: 999, fontSize: 14, fontWeight: 600, color: "#d4dae2" }}>{label} ↗</a>
             ))}

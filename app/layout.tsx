@@ -4,12 +4,19 @@ import { Header } from "@/components/site/Header";
 import { MotionRoot } from "@/components/site/MotionRoot";
 import { CookieBanner } from "@/components/site/CookieBanner";
 import { withBase } from "@/lib/paths";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
+const DESCRIPTION = "Where AI ambition becomes working machinery. We design and engineer AI with people at both ends.";
+
 export const metadata: Metadata = {
-  title: { default: "Trikhya Intelligence Foundry", template: "%s · Trikhya Intelligence Foundry" },
-  description: "Where AI ambition becomes working machinery. We design and engineer AI with people at both ends.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
+  description: DESCRIPTION,
   icons: { icon: withBase("/trikhya-mark.png") },
+  openGraph: { type: "website", siteName: SITE_NAME, title: SITE_NAME, description: DESCRIPTION, url: SITE_URL, locale: "en_IN", images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE_NAME }] },
+  twitter: { card: "summary_large_image", title: SITE_NAME, description: DESCRIPTION, images: ["/og.png"] },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

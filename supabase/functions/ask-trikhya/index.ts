@@ -50,7 +50,11 @@ KNOWLEDGE
 ${s.knowledge}
 ${docsText}`;
 
-    const turns: Turn[] = (Array.isArray(history) ? history : []).slice(-8).filter((h: Turn) => h && (h.role === "user" || h.role === "assistant") && typeof h.content === "string").map((h: Turn) => ({ role: h.role, content: h.content.slice(0, 600) }));
+    // Conversation history comes from our own log, never from the browser: a visitor could otherwise send
+    // invented "assistant" turns to steer the model. The client's `history` field is accepted and ignored.
+    void history;
+    const { data: prior } = await sb.from("godseye_conversations").select("question, answer").eq("session_id", session_id).order("ts", { ascending: false }).limit(4);
+    const turns: Turn[] = (prior ?? []).reverse().flatMap((p) => [{ role: "user" as const, content: String(p.question).slice(0, 600) }, { role: "assistant" as const, content: String(p.answer).slice(0, 600) }]);
     const raw = await chat(s.provider, s.model, [{ role: "system", content: system }, ...turns, { role: "user", content: q }], 350, 0.2);
     const TOPICS = ["company", "services", "solutions", "approach", "hiring", "contact", "pricing", "insights", "greeting", "out_of_scope"];
     let in_scope = true, answer = "", topic = "company";

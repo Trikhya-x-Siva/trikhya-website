@@ -84,7 +84,7 @@ export function AskTrikhyaAdmin({ onBack }: { onBack: () => void }) {
         <Kpi label="Avg response" value={`${(avgMs / 1000).toFixed(1)}s`} />
       </div>
       <nav style={{ display: "flex", gap: 24, borderBottom: `1px solid ${C.line}` }}>
-        {(["Conversations", "Knowledge", "Documents", "Behaviour"] as const).map((t) => <button key={t} className="adm-tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
+        {(["Conversations", "Knowledge", "Documents", "Behaviour"] as const).map((t) => <button key={t} className="adm-tab" data-on={tab === t ? "1" : undefined} onClick={() => setTab(t)}>{t}</button>)}
       </nav>
 
       {tab === "Conversations" ? (<>

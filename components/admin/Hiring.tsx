@@ -161,7 +161,7 @@ function RoleEditor({ job, onDone }: { job: JobRow | null; onDone: () => void })
       </div>
       {msg ? <span style={{ fontSize: 14, color: C.amber }}>{msg}</span> : null}
       <nav style={{ display: "flex", gap: 24, borderBottom: `1px solid ${C.line}` }}>
-        {(["Details", "Criteria", "Application form", "Questions"] as const).map((t) => <button key={t} className="adm-tab" aria-selected={tab === t} onClick={() => setTab(t)}>{t}</button>)}
+        {(["Details", "Criteria", "Application form", "Questions"] as const).map((t) => <button key={t} className="adm-tab" data-on={tab === t ? "1" : undefined} onClick={() => setTab(t)}>{t}</button>)}
       </nav>
 
       {tab === "Details" ? (
@@ -266,6 +266,7 @@ function Applications({ job, onBack }: { job: JobRow; onBack: () => void }) {
   const [pick, setPick] = useState<ApplicationRow | null>(null);
   const load = () => { supabase()!.from("applications").select("*").eq("job_id", job.id).order("created_at", { ascending: false }).then(({ data }) => setRows((data ?? []) as ApplicationRow[])); };
   useEffect(load, [job.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load is recreated each render; the role is the real dependency
   useEffect(() => { const t = setInterval(load, 20_000); return () => clearInterval(t); }, [job.id]);
 
   const visible = (rows ?? []).filter((r) => filter === "all" || r.status === filter);
@@ -326,6 +327,7 @@ function ApplicationDetail({ app: initial, job, onBack }: { app: ApplicationRow;
   const [ivMsg, setIvMsg] = useState("");
   const loadIv = () => { supabase()!.from("interviews").select("*").eq("application_id", app.id).order("created_at", { ascending: false }).limit(1).then(({ data }) => setIv((data?.[0] as Interview) ?? null)); };
   useEffect(loadIv, [app.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- polls while a call is live; loadIv is recreated each render
   useEffect(() => { if (!iv || !["queued", "initiating", "ringing", "in_progress"].includes(iv.status)) return; const t = setInterval(loadIv, 8000); return () => clearInterval(t); }, [iv]);
   const call = async () => {
     setBusy(true); setIvMsg("");

@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { CareersBoard } from "@/components/careers/CareersBoard";
-import { withBase } from "@/lib/paths";
 
 export function CareersPage() {
   const rootRef = useRef<HTMLDivElement>(null);

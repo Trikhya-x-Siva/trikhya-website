@@ -24,7 +24,6 @@ export function initAskTrikhya({ markWhite, markBlue }: Opts) {
     [/contact|email|talk|call|price|cost/i, "The quickest way is connect@trikhya.ai, or the form on our Contact page. We reply within two working days."],
     [/^(hi|hello|hey)/i, "Hello. This is Ask Trikhya, the site assistant. Ask me about our services, solutions or how a project runs."],
   ];
-  const SYSTEM = "You are Ask Trikhya, the website assistant for Trikhya Intelligence Foundry, an AI engineering company. They build AI with a Human-AI-Human approach (B-AI-B for internal teams, B-AI-C for customers). Offerings: Generalist AI Accelerators, Specialized AI Workflows, Domain Adapted Intelligence. Services: AI strategy & discovery, data & systems integration, custom assistants & agents, deployment & operations. Engagement: discover (weeks 0-2), prototype (2-6), deploy (6-18), evolve. Contact: connect@trikhya.ai. Never name clients. Reply in 1-3 short sentences.";
   const SUGG = ["What do you build?", "How long does a project take?", "What is H-AI-H?", "How do I get in touch?"];
   const css = (el: HTMLElement, s: Partial<CSSStyleDeclaration>) => Object.assign(el.style, s);
 

@@ -125,12 +125,13 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
 
   const refresh = () => { loadEvents(days).then((e) => { setEvents(e); setError(""); setRefreshedAt(new Date()); }).catch((e) => setError(String(e.message || e))); };
   useEffect(refresh, [days]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { const t = setInterval(refresh, 60_000); return () => clearInterval(t); }, [days]);
   const agg = useMemo(() => (events ? aggregate(events, days) : null), [events, days]);
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.ink, fontFamily: SANS }}>
-      <style>{`.adm-row:hover td{background:rgba(255,255,255,.03)} .adm-tab{all:unset;cursor:pointer;padding:10px 0;font-size:15px;color:${C.mid};border-bottom:2px solid transparent;transition:color .2s,border-color .2s} .adm-tab:hover{color:${C.ink}} .adm-tab[aria-selected=true]{color:${C.ink};border-color:${C.sky}}`}</style>
+      <style>{`.adm-row:hover td{background:rgba(255,255,255,.03)} .adm-tab{all:unset;cursor:pointer;padding:10px 0;font-size:15px;color:${C.mid};border-bottom:2px solid transparent;transition:color .2s,border-color .2s} .adm-tab:hover{color:${C.ink}} .adm-tab[aria-selected=true],.adm-tab[data-on]{color:${C.ink};border-color:${C.sky}}`}</style>
       <header style={{ borderBottom: `1px solid ${C.line}`, background: C.panel }}>
         <div style={{ maxWidth: 1400, margin: "0 auto", padding: "18px 28px 0", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
