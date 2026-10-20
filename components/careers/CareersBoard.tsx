@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { APPLY_EMAIL } from "@/content/jobs";
 import type { JobRow as Job } from "@/content/hiring-fields";
-import { useOpenJobs } from "@/lib/hiring";
+import { isLiveJob, useOpenJobs } from "@/lib/hiring";
 import { ApplyForm } from "./ApplyForm";
 import { track } from "@/lib/analytics";
 
@@ -158,7 +158,8 @@ function JobDialog({ job, onClose }: { job: Job; onClose: () => void }) {
           </div>
         </div>
         <div style={{ overflowY: "auto", padding: "28px", display: "flex", flexDirection: "column", gap: 28 }}>
-          {view === "apply" ? <ApplyForm job={job} onBack={() => setView("role")} onDone={(id) => { setAppId(id); setView("done"); }} /> : null}
+          {view === "apply" && !isLiveJob(job) ? <span role="alert" style={{ fontSize: 14, color: "#f0a35e" }}>Online applications are not available right now. Please email your CV to {APPLY_EMAIL}.</span> : null}
+          {view === "apply" && isLiveJob(job) ? <ApplyForm job={job} onBack={() => setView("role")} onDone={(id) => { setAppId(id); setView("done"); }} /> : null}
           {view === "done" ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "24px 0" }}>
               <span style={{ fontSize: 32, fontWeight: 800, color: "#4FB8EE", letterSpacing: "-.02em" }}>Application received.</span>

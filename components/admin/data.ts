@@ -114,10 +114,10 @@ export function aggregate(ev: Ev[], days: number) {
     jobs.set(j, r);
   });
 
-  const godseye = { opens: ev.filter((e) => e.name === "godseye_open").length, questions: ev.filter((e) => e.name === "godseye_question") };
+  const assistant = { opens: ev.filter((e) => e.name === "assistant_open" || e.name === "godseye_open").length, questions: ev.filter((e) => e.name === "assistant_question" || e.name === "godseye_question") };
   const contact = ev.filter((e) => e.name === "contact_submit").length;
 
-  return { total: ev.length, views: views.length, sessions: sessions.size, visitors: visitors.size, returning, bounceRate: perSession.size ? bounces / perSession.size : 0, avgSeconds, avgScroll, series, pageRows, interactions, referrers, landing, devices, languages, outbound, jobs, godseye, contact };
+  return { total: ev.length, views: views.length, sessions: sessions.size, visitors: visitors.size, returning, bounceRate: perSession.size ? bounces / perSession.size : 0, avgSeconds, avgScroll, series, pageRows, interactions, referrers, landing, devices, languages, outbound, jobs, assistant, contact };
 }
 
 export type Agg = ReturnType<typeof aggregate>;

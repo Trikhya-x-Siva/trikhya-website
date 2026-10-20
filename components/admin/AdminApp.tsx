@@ -9,7 +9,7 @@ import { JOBS } from "@/content/jobs";
 import { aggregate, loadEvents, pageName, RANGES, type Agg, type Ev } from "./data";
 import { Bars, C, Chart, Empty, fmt, Kpi, Label, MONO, Panel, pct, Pill, SANS, secs, Table } from "./ui";
 import { Hiring } from "./Hiring";
-import { GodseyeAdmin } from "./GodseyeAdmin";
+import { AskTrikhyaAdmin } from "./AskTrikhyaAdmin";
 
 const TABS = ["Overview", "Pages", "Careers", "Ask Trikhya", "Audience", "Live", "Admins"] as const;
 type Tab = (typeof TABS)[number];
@@ -121,7 +121,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
   const [refreshedAt, setRefreshedAt] = useState<Date | null>(null);
   const [pagePick, setPagePick] = useState<string | null>(null);
   const [showPw, setShowPw] = useState(() => { try { return /type=(invite|magiclink|recovery)/.test(location.hash) || sessionStorage.getItem("trikhya-set-pw") === "1"; } catch { return false; } });
-  const [manage, setManage] = useState<"hiring" | "godseye" | null>(null);
+  const [manage, setManage] = useState<"hiring" | "assistant" | null>(null);
 
   const refresh = () => { loadEvents(days).then((e) => { setEvents(e); setError(""); setRefreshedAt(new Date()); }).catch((e) => setError(String(e.message || e))); };
   useEffect(refresh, [days]);
@@ -154,12 +154,12 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
       <main style={{ maxWidth: 1400, margin: "0 auto", padding: "28px 28px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
         {showPw ? <SetPassword onDone={() => { setShowPw(false); try { sessionStorage.removeItem("trikhya-set-pw"); } catch { /* ignore */ } }} /> : null}
         {error ? <Panel><Empty text={`Could not load events: ${error}. Has the SQL migration been run in Supabase (${SUPABASE_URL})?`} /></Panel> : null}
-        {manage === "hiring" ? <Hiring onBack={() => setManage(null)} /> : manage === "godseye" ? <GodseyeAdmin onBack={() => setManage(null)} /> : !agg ? <Empty text="Loading events…" /> : (
+        {manage === "hiring" ? <Hiring onBack={() => setManage(null)} /> : manage === "assistant" ? <AskTrikhyaAdmin onBack={() => setManage(null)} /> : !agg ? <Empty text="Loading events…" /> : (
           <>
             {tab === "Overview" ? <Overview a={agg} days={days} onPage={(p) => { setPagePick(p); setTab("Pages"); }} /> : null}
             {tab === "Pages" ? <Pages a={agg} pick={pagePick} setPick={setPagePick} /> : null}
             {tab === "Careers" ? <Careers a={agg} onManage={() => setManage("hiring")} /> : null}
-            {tab === "Ask Trikhya" ? <Godseye a={agg} onManage={() => setManage("godseye")} /> : null}
+            {tab === "Ask Trikhya" ? <Assistant a={agg} onManage={() => setManage("assistant")} /> : null}
             {tab === "Audience" ? <Audience a={agg} /> : null}
             {tab === "Live" ? <Live events={events!} /> : null}
             {tab === "Admins" ? <Admins me={email} /> : null}
@@ -181,7 +181,7 @@ function Overview({ a, days, onPage }: { a: Agg; days: number; onPage: (p: strin
         <Kpi label="Page views" value={fmt(a.views)} sub={`${(a.sessions ? a.views / a.sessions : 0).toFixed(1)} per session`} />
         <Kpi label="Avg time on page" value={secs(a.avgSeconds)} sub={`${Math.round(a.avgScroll)}% average scroll depth`} />
         <Kpi label="Bounce rate" value={pct(a.bounceRate)} sub="single-page sessions" accent={a.bounceRate > 0.7 ? C.amber : undefined} />
-        <Kpi label="Enquiries" value={fmt(a.contact)} sub={`${a.godseye.questions.length} Ask Trikhya questions`} accent={C.green} />
+        <Kpi label="Enquiries" value={fmt(a.contact)} sub={`${a.assistant.questions.length} Ask Trikhya questions`} accent={C.green} />
       </div>
       <Panel title="Views and sessions per day"><Chart series={a.series} /></Panel>
       <div style={grid(360)}>
@@ -240,8 +240,8 @@ function Careers({ a, onManage }: { a: Agg; onManage: () => void }) {
   );
 }
 
-function Godseye({ a, onManage }: { a: Agg; onManage: () => void }) {
-  const qs = a.godseye.questions;
+function Assistant({ a, onManage }: { a: Agg; onManage: () => void }) {
+  const qs = a.assistant.questions;
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
@@ -249,8 +249,8 @@ function Godseye({ a, onManage }: { a: Agg; onManage: () => void }) {
         <button type="button" onClick={onManage} style={{ font: "inherit", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 999, border: "none", background: C.sky, color: C.bg, cursor: "pointer" }}>Ask Trikhya management →</button>
       </div>
       <div style={grid(200)}>
-        <Kpi label="Chat opened" value={fmt(a.godseye.opens)} />
-        <Kpi label="Questions asked" value={fmt(qs.length)} sub={`${(a.godseye.opens ? qs.length / a.godseye.opens : 0).toFixed(1)} per open`} />
+        <Kpi label="Chat opened" value={fmt(a.assistant.opens)} />
+        <Kpi label="Questions asked" value={fmt(qs.length)} sub={`${(a.assistant.opens ? qs.length / a.assistant.opens : 0).toFixed(1)} per open`} />
         <Kpi label="Sessions that asked" value={fmt(new Set(qs.map((q) => q.session_id)).size)} />
       </div>
       <Panel title="Every question" right={<span style={{ fontFamily: MONO, fontSize: 11, color: C.dim }}>NEWEST FIRST</span>}>

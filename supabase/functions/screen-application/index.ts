@@ -7,6 +7,9 @@ import { normaliseParsed, score, type Criteria, type ParsedResume } from "../_sh
 
 const MODEL = Deno.env.get("SCREENING_MODEL") ?? "claude-haiku-4-5";
 const MAX_ATTEMPTS = 4;
+// Most automatic screenings allowed per day. Beyond this, fresh applications wait as "new" for an admin to
+// run by hand, so a flood of fake applications cannot run up the model bill.
+const DAILY_CAP = Number(Deno.env.get("SCREEN_DAILY_CAP") ?? 100);
 
 const PARSE_PROMPT = `You are extracting candidate information from a resume for a hiring system.
 Return ONLY a JSON object with exactly this schema (use null or [] when not found, never invent):
@@ -51,11 +54,14 @@ Deno.serve(async (req) => {
     // Public callers (the apply form) may only trigger the first run of a fresh application.
     // Anything else (re-runs, failed rows, old rows) needs a signed-in admin.
     const fresh = app.status === "new" && (app.screen_attempts ?? 0) === 0 && Date.now() - new Date(app.created_at).getTime() < 15 * 60 * 1000;
-    if (!fresh) {
-      const auth = req.headers.get("Authorization") ?? "";
-      const user = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
-      const { data: isAdmin } = await user.rpc("is_admin");
-      if (!isAdmin) return json({ error: "admins only" }, 403);
+    const auth = req.headers.get("Authorization") ?? "";
+    const user = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
+    const { data: isAdmin } = await user.rpc("is_admin");
+    if (!fresh && !isAdmin) return json({ error: "admins only" }, 403);
+    if (!isAdmin) {
+      const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+      const { count } = await sb.from("applications").select("id", { count: "exact", head: true }).gte("screened_at", since);
+      if ((count ?? 0) >= DAILY_CAP) return json({ ok: true, deferred: true });
     }
     await sb.from("applications").update({ status: "screening", screen_error: null, screen_attempts: (app.screen_attempts ?? 0) + 1 }).eq("id", app.id);
 
@@ -95,7 +101,8 @@ Deno.serve(async (req) => {
       return json({ ok: true, score: mech.score, must_have_pass: mech.must_have_pass });
     } catch (e) {
       await sb.from("applications").update({ status: "failed", screen_error: String((e as Error).message).slice(0, 500) }).eq("id", app.id);
-      return json({ error: String((e as Error).message) }, 500);
+      // Provider error text (quota, model names) is for the admin's eyes; the public caller only learns it failed.
+      return json({ error: isAdmin ? String((e as Error).message) : "screening failed" }, 500);
     }
   } catch (e) {
     return json({ error: String((e as Error).message) }, 500);

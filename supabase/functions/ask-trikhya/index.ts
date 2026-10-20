@@ -1,6 +1,6 @@
 // Ask Trikhya: answers only about Trikhya, from the knowledge text in godseye_settings. Logs every exchange.
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { allowedOrigin, chat, cors, json, parseJson } from "../_shared/llm.ts";
+import { allowedOrigin, callerHash, chat, cors, json, parseJson } from "../_shared/llm.ts";
 
 type Turn = { role: "user" | "assistant"; content: string };
 
@@ -10,8 +10,10 @@ Deno.serve(async (req) => {
   const t0 = Date.now();
   try {
     const { session_id, question, history = [], path = null } = await req.json();
-    if (typeof question !== "string" || !question.trim() || typeof session_id !== "string") return json({ error: "bad request" }, 400);
+    if (typeof question !== "string" || !question.trim() || typeof session_id !== "string" || session_id.length > 64) return json({ error: "bad request" }, 400);
     const q = question.trim().slice(0, 600);
+    const p = typeof path === "string" ? path.slice(0, 300) : null;
+    const caller = await callerHash(req);
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     const { data: s } = await sb.from("godseye_settings").select("*").eq("id", 1).single();
@@ -23,6 +25,10 @@ Deno.serve(async (req) => {
     if ((today ?? 0) >= s.daily_cap) return json({ fallback: true, reason: "cap" });
     const { count: mine } = await sb.from("godseye_conversations").select("id", { count: "exact", head: true }).eq("session_id", session_id);
     if ((mine ?? 0) >= s.max_turns) return json({ answer: s.handoff, in_scope: true, limited: true });
+    // The session id is chosen by the browser, so a fresh one must not reset the limit: the network address
+    // gets a few sessions' worth per day as well.
+    const { count: fromCaller } = await sb.from("godseye_conversations").select("id", { count: "exact", head: true }).eq("caller", caller).gte("ts", since.toISOString());
+    if ((fromCaller ?? 0) >= s.max_turns * 4) return json({ answer: s.handoff, in_scope: true, limited: true });
 
     const { data: docs } = await sb.from("godseye_documents").select("title, content").eq("enabled", true).eq("status", "ready").order("created_at");
     let budget = 40000; const parts: string[] = [];
@@ -58,10 +64,10 @@ ${docsText}`;
     if (!in_scope || !answer) { in_scope = false; answer = s.refusal; topic = "out_of_scope"; }
 
     const latency_ms = Date.now() - t0;
-    await sb.from("godseye_conversations").insert({ session_id, path, question: q, answer, in_scope, topic, latency_ms, model: `${s.provider}/${s.model}` });
+    await sb.from("godseye_conversations").insert({ session_id, caller, path: p, question: q, answer, in_scope, topic, latency_ms, model: `${s.provider}/${s.model}` });
     return json({ answer, in_scope, latency_ms });
   } catch (e) {
-    console.error("godseye", (e as Error).message);
+    console.error("ask-trikhya", (e as Error).message);
     return json({ fallback: true }, 200);
   }
 });

@@ -23,10 +23,14 @@ Deno.serve(async (req) => {
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     await sb.from("admins").upsert({ email: addr }, { onConflict: "email" });
 
-    // Existing auth user gets a magic link; a new one gets an invite. Both land signed in.
-    const { data: existing } = await sb.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    const has = (existing?.users ?? []).some((u) => (u.email ?? "").toLowerCase() === addr);
-    const { data, error } = await sb.auth.admin.generateLink({ type: has ? "magiclink" : "invite", email: addr, options: { redirectTo } });
+    // A new auth user gets an invite; if the address is already registered the invite is refused, and a
+    // magic link is issued instead. Both land signed in. No paging through the user list.
+    let has = false;
+    let { data, error } = await sb.auth.admin.generateLink({ type: "invite", email: addr, options: { redirectTo } });
+    if (error && /already|exists|registered/i.test(error.message)) {
+      has = true;
+      ({ data, error } = await sb.auth.admin.generateLink({ type: "magiclink", email: addr, options: { redirectTo } }));
+    }
     if (error || !data?.properties?.action_link) return json({ error: error?.message ?? "could not create link" }, 500);
     return json({ ok: true, link: data.properties.action_link, existing: has });
   } catch (e) {

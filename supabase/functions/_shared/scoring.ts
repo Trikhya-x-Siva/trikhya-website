@@ -1,4 +1,4 @@
-// Mechanical resume scoring. Ported from the SparkMinda hiring module, with the education ladder
+// Mechanical resume scoring. Ported from the hiring screener prototype, with the education ladder
 // adapted to the labels the role editor offers (Diploma, Bachelor's, Master's, PhD).
 
 export type ParsedResume = {

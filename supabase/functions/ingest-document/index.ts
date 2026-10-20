@@ -1,4 +1,4 @@
-// Turns an uploaded Godseye document (PDF, text or markdown) into plain text stored on its row.
+// Turns an uploaded Ask Trikhya document (PDF, text or markdown) into plain text stored on its row.
 // Called by the admin UI right after upload. Requires an admin's session token.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import { extractText, getDocumentProxy } from "npm:unpdf@0.12.1";

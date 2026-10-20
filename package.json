@@ -6,11 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "record:nlq": "node scripts/record/nlq.mjs",
-    "record:training": "node scripts/record/training.mjs",
-    "record:hiring": "node scripts/record/make-resumes.mjs \"D:/Work/Trikhya Internal/sparkminda-platform/backend\" && node scripts/record/hiring.mjs",
-    "record:setup": "npm --prefix scripts/record install && npx --prefix scripts/record playwright install chromium"
+    "lint": "eslint"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -55,12 +55,22 @@ export function parseJson<T>(raw: string): T {
   throw new Error("Model did not return JSON");
 }
 
-/** Browser callers must come from one of our origins. Server-to-server callers (no Origin) are allowed. */
-const ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "https://trikhya-x-siva.github.io,https://trikhya.ai,https://www.trikhya.ai,http://localhost:3000").split(",").map((s) => s.trim());
+/** Browser callers must come from one of our origins. Every function here is called from the browser, so a
+ *  request with no Origin header is refused too. Add the Vercel project's own *.vercel.app hostname (never a
+ *  wildcard: anyone can deploy to vercel.app) through the ALLOWED_ORIGINS secret, comma-separated. */
+const ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "https://trikhya.ai,https://www.trikhya.ai,http://localhost:3000").split(",").map((s) => s.trim()).filter(Boolean);
 export function allowedOrigin(req: Request) {
-  const o = req.headers.get("Origin"); if (!o) return true;
+  const o = req.headers.get("Origin"); if (!o) return false;
   if (ORIGINS.includes(o)) return true;
-  try { const h = new URL(o).hostname; return o.startsWith("https://") && (h.endsWith(".vercel.app") || h === "trikhya.ai" || h.endsWith(".trikhya.ai")); } catch { return false; }
+  try { const h = new URL(o).hostname; return o.startsWith("https://") && (h === "trikhya.ai" || h.endsWith(".trikhya.ai")); } catch { return false; }
+}
+
+/** Stable, non-reversible id for the caller's network address, for per-visitor limits that a new session id cannot reset. */
+export async function callerHash(req: Request) {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("cf-connecting-ip") || "unknown";
+  const salt = Deno.env.get("IP_HASH_SALT") ?? "trikhya";
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${salt}:${ip}`)));
+  return Array.from(bytes.slice(0, 16)).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export const cors = {

@@ -1,17 +1,17 @@
 import { track } from "./analytics";
 import { supabase } from "./supabase";
-/* Ask Trikhya, the floating site assistant from the design. Answers from a small
- * knowledge base; a model-backed answer is used only if window.claude exists. */
+/* Ask Trikhya, the floating site assistant from the design. Answers come from the `ask-trikhya`
+ * server function when the admin has switched it on; otherwise from the small fixed set below. */
 
 type Opts = { markWhite: string; markBlue: string };
 
 declare global {
-  interface Window { __godseye?: boolean; claude?: { complete?: (prompt: string) => Promise<string> } }
+  interface Window { __askTrikhya?: boolean }
 }
 
-export function initGodseye({ markWhite, markBlue }: Opts) {
-  if (typeof window === "undefined" || window.__godseye) return;
-  window.__godseye = true;
+export function initAskTrikhya({ markWhite, markBlue }: Opts) {
+  if (typeof window === "undefined" || window.__askTrikhya) return;
+  window.__askTrikhya = true;
   const L = "#4FB8EE", INK = "#0E1116", PANEL = "#161a21", LINE = "#2a313c", F = "'Hanken Grotesk',sans-serif", M = "'JetBrains Mono',monospace";
   const reduce = window.__trikhyaReduce ?? false;
   const KB: [RegExp, string][] = [
@@ -29,8 +29,8 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
   const css = (el: HTMLElement, s: Partial<CSSStyleDeclaration>) => Object.assign(el.style, s);
 
   const mount = () => {
-    if (!document.body || document.querySelector("[data-godseye]")) return;
-    const root = document.createElement("div"); root.setAttribute("data-godseye", "");
+    if (!document.body || document.querySelector("[data-ask-trikhya]")) return;
+    const root = document.createElement("div"); root.setAttribute("data-ask-trikhya", "");
     css(root, { position: "fixed", right: "24px", bottom: "24px", zIndex: "350", fontFamily: F, color: "#fff" });
     root.innerHTML = `
 <div data-g-panel style="position:absolute;right:0;bottom:76px;width:min(370px,calc(100vw - 32px));height:min(520px,calc(100vh - 140px));background:${PANEL};border:1px solid ${LINE};border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;opacity:0;transform:translateY(12px) scale(.96);pointer-events:none;transition:opacity .25s, transform .3s cubic-bezier(.2,.7,.2,1);">
@@ -63,7 +63,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     const remote = async (q: string): Promise<string | null> => {
       if (!sb || !live) return null;
       try {
-        const { data, error } = await sb.functions.invoke("godseye", { body: { session_id: sessionId, question: q, history: turns.slice(-8), path: location.pathname } });
+        const { data, error } = await sb.functions.invoke("ask-trikhya", { body: { session_id: sessionId, question: q, history: turns.slice(-8), path: location.pathname } });
         if (error || !data || data.fallback || typeof data.answer !== "string") return null;
         return data.answer;
       } catch { return null; }
@@ -89,8 +89,8 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     };
     const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "Good question. A person from our team can answer that properly: write to hello@trikhya.ai and we'll reply within two working days."])[1] as string;
     const ask = async (q: string) => {
-      track("godseye_question", { q: q.slice(0, 300) });
       if (!q.trim() || busy) return;
+      track("assistant_question", { q: q.slice(0, 300) });
       busy = true; sugg.style.display = "none"; bubble("me", q); input.value = ""; const t = typing();
       let a: string | null = null;
       a = await remote(q);
@@ -115,7 +115,7 @@ export function initGodseye({ markWhite, markBlue }: Opts) {
     };
     fit(); addEventListener("resize", fit);
     bubble("bot", "Hi. This is Ask Trikhya. Ask me anything about Trikhya Intelligence Foundry.");
-    $("[data-g-btn]").onclick = () => { if (!open) track("godseye_open"); setOpen(!open); }; $("[data-g-close]").onclick = () => setOpen(false);
+    $("[data-g-btn]").onclick = () => { if (!open) track("assistant_open"); setOpen(!open); }; $("[data-g-close]").onclick = () => setOpen(false);
     ($("[data-g-form]") as HTMLFormElement).onsubmit = (e) => { e.preventDefault(); ask(input.value); };
     document.addEventListener("keydown", (e) => { if (e.key === "Escape" && open) setOpen(false); });
     const mark = $("[data-g-btn] img");

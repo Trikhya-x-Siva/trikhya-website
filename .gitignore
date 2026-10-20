@@ -48,6 +48,3 @@ next-env.d.ts
 # Supabase CLI scratch
 /supabase/.temp/
 
-# recording scratch
-.record-tmp/
-scripts/record/node_modules/

@@ -63,7 +63,13 @@ export function initMotion({ markWhite, markBlue }: Opts) {
       scrollers.add(el);
     },
     fill(el) {
-      el.innerHTML = (el.textContent || "").trim().split(/\s+/).map((w) => `<span data-fw style="transition:opacity .25s;opacity:.18;">${w}</span>`).join(" ");
+      const words = (el.textContent || "").trim().split(/\s+/);
+      el.textContent = "";
+      words.forEach((w, i) => {
+        const s = document.createElement("span"); s.dataset.fw = ""; s.style.cssText = "transition:opacity .25s;opacity:.18;"; s.textContent = w;
+        if (i) el.appendChild(document.createTextNode(" "));
+        el.appendChild(s);
+      });
       if (reduce) el.querySelectorAll<HTMLElement>("[data-fw]").forEach((s) => (s.style.opacity = "1"));
       scrollers.add(el);
     },

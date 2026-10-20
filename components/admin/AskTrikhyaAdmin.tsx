@@ -29,7 +29,7 @@ function topicOf(c: Conv): string {
 }
 
 /** Ask Trikhya management: what it knows, how it refuses, whether it is on, and every conversation it has had. */
-export function GodseyeAdmin({ onBack }: { onBack: () => void }) {
+export function AskTrikhyaAdmin({ onBack }: { onBack: () => void }) {
   const [s, setS] = useState<Settings | null>(null);
   const [dirty, setDirty] = useState(false);
   const [msg, setMsg] = useState("");
