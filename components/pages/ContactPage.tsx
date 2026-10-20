@@ -5,7 +5,7 @@ import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 import { track } from "@/lib/analytics";
-import { CONTACT_EMAIL, MAILTO, copyEmail, sendMessage } from "@/lib/contact";
+import { CONTACT_EMAIL, MAILTO, sendMessage } from "@/lib/contact";
 
 export function ContactPage() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -13,7 +13,6 @@ export function ContactPage() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [copied, setCopied] = useState(false);
   const [hp, setHp] = useState("");
   const notSent = !sent;
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +24,7 @@ export function ContactPage() {
     setBusy(true);
     try { await sendMessage(m); track("contact_submit"); setSent(true); } catch (ex) { setErr((ex as Error).message); } finally { setBusy(false); }
   };
-  const onEmail = () => { copyEmail().then((ok) => { if (ok) { setCopied(true); setTimeout(() => setCopied(false), 2500); } }); track("click", { label: "Email us directly", href: MAILTO }); };
+  const onEmail = () => track("click", { label: "Email us directly", href: MAILTO });
   return (
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
@@ -44,7 +43,6 @@ export function ContactPage() {
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Tell us what you’re working on.</h2>
 <p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "520px" }}>A few lines is enough. We reply within two working days.</p>
 <a href={MAILTO} onClick={onEmail} data-sweep="1" style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "14px", border: "1.5px solid #4FB8EE", color: "#4FB8EE", fontWeight: "700", fontSize: "17px", padding: "16px 26px", borderRadius: "999px" }}><span>✉</span><span>Email us directly</span></a>
-<span style={{ fontSize: "17px", color: "#d4dae2" }}>{copied ? <span style={{ color: "#4FB8EE" }}>Address copied: {CONTACT_EMAIL}</span> : <>Or write to <a href={MAILTO} onClick={onEmail} style={{ color: "#4FB8EE", borderBottom: "1px solid #4FB8EE" }}>{CONTACT_EMAIL}</a></>}</span>
 </div>
 <div data-reveal="1">
 {notSent ? (<>

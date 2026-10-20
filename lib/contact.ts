@@ -13,8 +13,3 @@ export async function sendMessage(m: MessageInput): Promise<void> {
   const { error } = await sb.from("messages").insert({ name: m.name.trim(), email: m.email.trim(), company: m.company.trim() || null, message: m.message.trim(), session_id });
   if (error) throw new Error(error.message.includes("row-level security") ? `Please check the fields: a name, a valid email and a message of at least a few words.` : `${error.message}. You can also email ${CONTACT_EMAIL}.`);
 }
-
-/** Copies the address to the clipboard; returns whether it worked. Used beside mailto links, which do nothing on a machine with no mail app. */
-export async function copyEmail(): Promise<boolean> {
-  try { await navigator.clipboard.writeText(CONTACT_EMAIL); return true; } catch { return false; }
-}
