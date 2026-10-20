@@ -4,7 +4,7 @@
 export type LegalSection = { id: string; title: string; paras?: string[]; items?: string[]; after?: string[] };
 export type LegalDoc = { slug: string; title: string; lead: string; updated: string; sections: LegalSection[] };
 
-export const PRIVACY_EMAIL = "privacy@trikhya.ai";
+export const PRIVACY_EMAIL = "connect@trikhya.ai";
 export const COMPANY = "Trikhya Intelligence Foundry";
 
 export const PRIVACY: LegalDoc = {

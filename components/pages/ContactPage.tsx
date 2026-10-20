@@ -5,13 +5,27 @@ import { usePageMotion } from "@/lib/page-motion";
 import { MARK_WHITE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
 import { track } from "@/lib/analytics";
+import { CONTACT_EMAIL, MAILTO, copyEmail, sendMessage } from "@/lib/contact";
 
 export function ContactPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   usePageMotion(rootRef);
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [hp, setHp] = useState("");
   const notSent = !sent;
-  const submit = (e: React.FormEvent) => { e.preventDefault(); setSent(true); track("contact_submit"); };
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); setErr("");
+    if (hp) { setSent(true); return; } // a bot filled the hidden field: pretend, store nothing
+    const f = new FormData(e.currentTarget);
+    const m = { name: String(f.get("name") ?? ""), email: String(f.get("email") ?? ""), company: String(f.get("company") ?? ""), message: String(f.get("message") ?? "") };
+    if (m.message.trim().length < 10) { setErr("Tell us a little more: a sentence or two is enough."); return; }
+    setBusy(true);
+    try { await sendMessage(m); track("contact_submit"); setSent(true); } catch (ex) { setErr((ex as Error).message); } finally { setBusy(false); }
+  };
+  const onEmail = () => { copyEmail().then((ok) => { if (ok) { setCopied(true); setTimeout(() => setCopied(false), 2500); } }); track("click", { label: "Email us directly", href: MAILTO }); };
   return (
     <div ref={rootRef} style={{ fontFamily: "'Hanken Grotesk',sans-serif", color: "#0E1116", background: "#F4F6F8", overflowX: "clip" }}>
 <section style={{ position: "relative", background: "#1670A6", color: "#ffffff", overflow: "hidden", marginTop: "-81px", paddingTop: "81px" }}>
@@ -29,25 +43,28 @@ export function ContactPage() {
 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".16em", color: "#4FB8EE" }}>SEND A MESSAGE</span>
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.2vw,60px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em" }}>Tell us what you’re working on.</h2>
 <p style={{ margin: "0", fontSize: "20px", lineHeight: "1.55", color: "#aab3bf", maxWidth: "520px" }}>A few lines is enough. We reply within two working days.</p>
-<a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-sweep="1" style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "14px", border: "1.5px solid #4FB8EE", color: "#4FB8EE", fontWeight: "700", fontSize: "17px", padding: "16px 26px", borderRadius: "999px" }}><span>✉</span><span>Email us directly</span></a>
+<a href={MAILTO} onClick={onEmail} data-sweep="1" style={{ alignSelf: "flex-start", display: "flex", alignItems: "center", gap: "14px", border: "1.5px solid #4FB8EE", color: "#4FB8EE", fontWeight: "700", fontSize: "17px", padding: "16px 26px", borderRadius: "999px" }}><span>✉</span><span>Email us directly</span></a>
+<span style={{ fontSize: "17px", color: "#d4dae2" }}>{copied ? <span style={{ color: "#4FB8EE" }}>Address copied: {CONTACT_EMAIL}</span> : <>Or write to <a href={MAILTO} onClick={onEmail} style={{ color: "#4FB8EE", borderBottom: "1px solid #4FB8EE" }}>{CONTACT_EMAIL}</a></>}</span>
 </div>
 <div data-reveal="1">
 {notSent ? (<>
 <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+<input type="text" name="website" value={hp} onChange={(e) => setHp(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden style={{ position: "absolute", left: -9999, width: 1, height: 1, opacity: 0 }} />
 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: "20px" }}>
-<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>NAME<input required style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
-<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>WORK EMAIL<input type="email" required style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
+<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>NAME<input name="name" required minLength={2} maxLength={120} style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
+<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>WORK EMAIL<input name="email" type="email" required maxLength={200} style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
 </div>
-<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>COMPANY<input style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
-<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>WHAT ARE YOU TRYING TO CHANGE?<textarea rows={4} style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", resize: "vertical", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;"></textarea></label>
-<button type="submit" style={{ alignSelf: "flex-start", marginTop: "12px", background: "#4FB8EE", color: "#0E1116", border: "none", fontWeight: "700", fontSize: "17px", padding: "18px 32px", borderRadius: "999px", cursor: "pointer" }} data-hover="background:#8fd3f7;">Send message →</button>
+<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>COMPANY<input name="company" maxLength={200} style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;" /></label>
+<label style={{ display: "flex", flexDirection: "column", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".1em", color: "#8a94a1" }}>WHAT ARE YOU TRYING TO CHANGE?<textarea name="message" required minLength={10} maxLength={4000} rows={4} style={{ background: "transparent", border: "none", borderBottom: "1.5px solid #3a4250", color: "#ffffff", fontFamily: "'Hanken Grotesk',sans-serif", fontSize: "19px", padding: "10px 0", outline: "none", resize: "vertical", letterSpacing: "0" }} data-focus="border-bottom-color:#4FB8EE;"></textarea></label>
+<button type="submit" style={{ alignSelf: "flex-start", marginTop: "12px", background: "#4FB8EE", color: "#0E1116", border: "none", fontWeight: "700", fontSize: "17px", padding: "18px 32px", borderRadius: "999px", cursor: "pointer" }} data-hover="background:#8fd3f7;" disabled={busy}>{busy ? "Sending…" : "Send message →"}</button>
+{err ? <span role="alert" style={{ fontSize: "15px", color: "#f0a35e" }}>{err}</span> : null}
 <span style={{ fontSize: "13px", lineHeight: "1.5", color: "#8a94a1", maxWidth: "520px" }}>By sending this you agree that we use these details to reply to you, as described in our <a href={withBase("/privacy/")} style={{ color: "#4FB8EE", borderBottom: "1px solid #4FB8EE" }}>privacy policy</a>.</span>
 </form>
 </>) : null}
 {sent ? (<>
 <div style={{ border: "1px solid #2a313c", padding: "48px", display: "flex", flexDirection: "column", gap: "12px" }}>
 <span style={{ fontSize: "32px", fontWeight: "800", color: "#4FB8EE" }}>Message received.</span>
-<span style={{ fontSize: "18px", color: "#aab3bf" }}>We’ll be in touch within two working days.</span>
+<span style={{ fontSize: "18px", color: "#aab3bf" }}>We’ll be in touch within two working days. If it is urgent, write to {CONTACT_EMAIL}.</span>
 </div>
 </>) : null}
 </div>

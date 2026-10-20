@@ -20,11 +20,11 @@ export function initAskTrikhya({ markWhite, markBlue }: Opts) {
     [/long|time|week|month|timeline/i, "Typically 2 weeks to discover, about 4 more to a working prototype, and around 3 months to deploy across the organisation."],
     [/h-?ai-?h|human|b-?ai/i, "Human, AI, Human: people set the intent, we engineer the intelligence, and people act on the result. B-AI-B serves your teams; B-AI-C serves your customers."],
     [/data|secur|privacy|safe/i, "Systems run in your environment or a private cloud and follow your existing access rules. People keep the final say."],
-    [/job|career|hiring|role|work with/i, "We hire engineers, data people and product thinkers. See the Careers page or write to careers@trikhya.ai."],
-    [/contact|email|talk|call|price|cost/i, "The quickest way is hello@trikhya.ai, or the form on our Contact page. We reply within two working days."],
+    [/job|career|hiring|role|work with/i, "There are no open roles at the moment. If you would like to work with us, write to connect@trikhya.ai."],
+    [/contact|email|talk|call|price|cost/i, "The quickest way is connect@trikhya.ai, or the form on our Contact page. We reply within two working days."],
     [/^(hi|hello|hey)/i, "Hello. This is Ask Trikhya, the site assistant. Ask me about our services, solutions or how a project runs."],
   ];
-  const SYSTEM = "You are Ask Trikhya, the website assistant for Trikhya Intelligence Foundry, an AI engineering company. They build AI with a Human-AI-Human approach (B-AI-B for internal teams, B-AI-C for customers). Offerings: Generalist AI Accelerators, Specialized AI Workflows, Domain Adapted Intelligence. Services: AI strategy & discovery, data & systems integration, custom assistants & agents, deployment & operations. Engagement: discover (weeks 0-2), prototype (2-6), deploy (6-18), evolve. Contact: hello@trikhya.ai. Never name clients. Reply in 1-3 short sentences.";
+  const SYSTEM = "You are Ask Trikhya, the website assistant for Trikhya Intelligence Foundry, an AI engineering company. They build AI with a Human-AI-Human approach (B-AI-B for internal teams, B-AI-C for customers). Offerings: Generalist AI Accelerators, Specialized AI Workflows, Domain Adapted Intelligence. Services: AI strategy & discovery, data & systems integration, custom assistants & agents, deployment & operations. Engagement: discover (weeks 0-2), prototype (2-6), deploy (6-18), evolve. Contact: connect@trikhya.ai. Never name clients. Reply in 1-3 short sentences.";
   const SUGG = ["What do you build?", "How long does a project take?", "What is H-AI-H?", "How do I get in touch?"];
   const css = (el: HTMLElement, s: Partial<CSSStyleDeclaration>) => Object.assign(el.style, s);
 
@@ -87,7 +87,7 @@ export function initAskTrikhya({ markWhite, markBlue }: Opts) {
       if (!reduce) b.querySelectorAll("span").forEach((d, i) => d.animate([{ opacity: 0.3 }, { opacity: 1 }, { opacity: 0.3 }], { duration: 900, delay: i * 150, iterations: Infinity }));
       return b;
     };
-    const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "Good question. A person from our team can answer that properly: write to hello@trikhya.ai and we'll reply within two working days."])[1] as string;
+    const canned = (q: string) => (KB.find(([r]) => r.test(q)) || [0, "Good question. A person from our team can answer that properly: write to connect@trikhya.ai and we'll reply within two working days."])[1] as string;
     const ask = async (q: string) => {
       if (!q.trim() || busy) return;
       track("assistant_question", { q: q.slice(0, 300) });

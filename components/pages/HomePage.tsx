@@ -184,7 +184,7 @@ export function HomePage() {
 <h2 style={{ margin: "0", fontSize: "clamp(36px,4.6vw,64px)", lineHeight: "1", fontWeight: "800", letterSpacing: "-.035em", maxWidth: "760px" }}>Bring us the problem. We’ll bring the machinery.</h2>
 <div style={{ display: "flex", flexWrap: "wrap", gap: "14px" }}>
 <a href={withBase("/contact/")} style={{ background: "#ffffff", color: "#0F4A70", fontWeight: "700", fontSize: "17px", padding: "18px 30px", borderRadius: "999px" }} data-hover="background:#BFE6FA;color:#0F4A70;">Start a conversation →</a>
-<a href="mailto:hello@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>✉ Email us</a>
+<a href="mailto:connect@trikhya.ai?subject=Project%20enquiry%20for%20Trikhya" data-sweep="#ffffff" data-sweep-ink="#0F4A70" style={{ border: "1.5px solid rgba(255,255,255,.7)", color: "#ffffff", fontWeight: "600", fontSize: "17px", padding: "17px 28px", borderRadius: "999px" }}>✉ Email us</a>
 </div>
 </div>
 </section>

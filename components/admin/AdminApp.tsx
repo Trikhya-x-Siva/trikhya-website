@@ -5,13 +5,13 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase, SUPABASE_URL } from "@/lib/supabase";
 import { MARK_BLUE } from "@/lib/assets";
 import { withBase } from "@/lib/paths";
-import { JOBS } from "@/content/jobs";
 import { aggregate, loadEvents, pageName, RANGES, type Agg, type Ev } from "./data";
 import { Bars, C, Chart, Empty, fmt, Kpi, Label, MONO, Panel, pct, Pill, SANS, secs, Table } from "./ui";
 import { Hiring } from "./Hiring";
+import { Messages } from "./Messages";
 import { AskTrikhyaAdmin } from "./AskTrikhyaAdmin";
 
-const TABS = ["Overview", "Pages", "Careers", "Ask Trikhya", "Audience", "Live", "Admins"] as const;
+const TABS = ["Overview", "Messages", "Pages", "Careers", "Ask Trikhya", "Audience", "Live", "Admins"] as const;
 type Tab = (typeof TABS)[number];
 
 export function AdminApp() {
@@ -157,6 +157,7 @@ function Dashboard({ email, onSignOut }: { email: string; onSignOut: () => void 
         {manage === "hiring" ? <Hiring onBack={() => setManage(null)} /> : manage === "assistant" ? <AskTrikhyaAdmin onBack={() => setManage(null)} /> : !agg ? <Empty text="Loading events…" /> : (
           <>
             {tab === "Overview" ? <Overview a={agg} days={days} onPage={(p) => { setPagePick(p); setTab("Pages"); }} /> : null}
+            {tab === "Messages" ? <Messages /> : null}
             {tab === "Pages" ? <Pages a={agg} pick={pagePick} setPick={setPagePick} /> : null}
             {tab === "Careers" ? <Careers a={agg} onManage={() => setManage("hiring")} /> : null}
             {tab === "Ask Trikhya" ? <Assistant a={agg} onManage={() => setManage("assistant")} /> : null}
@@ -219,7 +220,7 @@ function Pages({ a, pick, setPick }: { a: Agg; pick: string | null; setPick: (p:
 }
 
 function Careers({ a, onManage }: { a: Agg; onManage: () => void }) {
-  const rows = JOBS.map((j) => { const r = a.jobs.get(j.id) ?? { opens: 0, copies: 0, applies: 0, applied: 0 }; return [j.title, fmt(r.opens), fmt(r.copies), fmt(r.applies), fmt(r.applied), pct(r.opens ? r.applied / r.opens : 0)]; });
+  const rows = [...a.jobs.entries()].map(([id, r]) => { return [id, fmt(r.opens), fmt(r.copies), fmt(r.applies), fmt(r.applied), pct(r.opens ? r.applied / r.opens : 0)]; });
   const careers = a.pageRows.find((p) => p.path.replace(/\/$/, "").endsWith("/careers"));
   const totals = [...a.jobs.values()].reduce((t, r) => ({ opens: t.opens + r.opens, copies: t.copies + r.copies, applies: t.applies + r.applies, applied: t.applied + r.applied }), { opens: 0, copies: 0, applies: 0, applied: 0 });
   return (
